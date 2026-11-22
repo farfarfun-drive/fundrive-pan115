@@ -60,10 +60,10 @@ from typing import (
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from filelock import FileLock
-from iterutils import run_gen_step
+from fundrives.pan115._vendor.iterutils import run_gen_step
 from orjson import loads, dumps
 from fundrives.pan115._vendor.p115pickcode import is_valid_pickcode, to_id, to_pickcode
-from urllib3_future_request import request
+from fundrives.pan115._vendor.urllib3_future_request import request
 from yarl import URL
 
 from .const import _CACHE_DIR

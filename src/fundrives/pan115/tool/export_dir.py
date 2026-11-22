@@ -30,8 +30,8 @@ from os import PathLike
 from time import sleep, time
 from typing import cast, overload, Any, Literal
 
-from filewrap import SupportsRead
-from iterutils import (
+from fundrives.pan115._vendor.filewrap import SupportsRead
+from fundrives.pan115._vendor.iterutils import (
     run_gen_step,
     run_gen_step_iter,
     with_iter_next,

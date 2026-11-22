@@ -49,8 +49,8 @@ from os import PathLike
 from typing import cast, overload, Any, Literal
 from types import EllipsisType
 
-from concurrenttools import conmap
-from iterutils import (
+from fundrives.pan115._vendor.concurrenttools import conmap
+from fundrives.pan115._vendor.iterutils import (
     chunked,
     collect,
     foreach,

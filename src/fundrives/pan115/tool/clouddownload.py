@@ -12,7 +12,12 @@ from time import sleep, time
 from typing import overload, Literal
 
 from fundrives.pan115._vendor.errno2 import errno
-from iterutils import run_gen_step_iter, with_iter_next, Yield, YieldFrom
+from fundrives.pan115._vendor.iterutils import (
+    run_gen_step_iter,
+    with_iter_next,
+    Yield,
+    YieldFrom,
+)
 
 from ..client import check_response, P115Client, P115OpenClient
 from ..exception import throw

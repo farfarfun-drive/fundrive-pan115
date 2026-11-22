@@ -42,22 +42,22 @@ from typing import (
 from weakref import WeakValueDictionary
 
 from fundrives.pan115._vendor.cachedict import LRUDict
-from download import download, download_async
-from ed2k import ed2k_hash, ed2k_hash_async
+from fundrives.pan115._vendor.download import download, download_async
+from fundrives.pan115._vendor.ed2k import ed2k_hash, ed2k_hash_async
 from fundrives.pan115._vendor.errno2 import errno
-from filewrap import AsyncBufferedReader, AsyncTextIOWrapper
+from fundrives.pan115._vendor.filewrap import AsyncBufferedReader, AsyncTextIOWrapper
 from fundrives.pan115._vendor.glob_pattern import translate_iter
-from hashtools import (
+from fundrives.pan115._vendor.hashtools import (
     HashObj,
     file_digest,
     file_mdigest,
     file_digest_async,
     file_mdigest_async,
 )
-from httpfile import AsyncHTTPFileReader, HTTPFileReader
+from fundrives.pan115._vendor.httpfile import AsyncHTTPFileReader, HTTPFileReader
 from fundrives.pan115._vendor.id2dirnode import IdToDirnode
-from iterdir import iterdir_generic, walk_generic
-from iterutils import (
+from fundrives.pan115._vendor.iterdir import iterdir_generic, walk_generic
+from fundrives.pan115._vendor.iterutils import (
     map as do_map,
     run_gen_step,
     run_gen_step_iter,

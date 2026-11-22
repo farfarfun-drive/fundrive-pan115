@@ -9,8 +9,14 @@ from os import PathLike
 from time import time
 from typing import overload, Any, Literal
 
-from iterutils import foreach, run_gen_step
-from sqlitetools import connect, execute, executescript, query, upsert_items
+from fundrives.pan115._vendor.iterutils import foreach, run_gen_step
+from fundrives.pan115._vendor.sqlitetools import (
+    connect,
+    execute,
+    executescript,
+    query,
+    upsert_items,
+)
 
 from .history import iter_history_once
 from .iterdir import iter_dirs, iter_life_behavior_once

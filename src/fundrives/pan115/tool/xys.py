@@ -16,7 +16,11 @@ from collections.abc import AsyncIterator, Coroutine, Iterable, Iterator
 from os import PathLike
 from typing import overload, Any, Literal
 
-from iterutils import run_gen_step, run_gen_step_iter, YieldFrom
+from fundrives.pan115._vendor.iterutils import (
+    run_gen_step,
+    run_gen_step_iter,
+    YieldFrom,
+)
 
 from ..client import check_response, P115Client
 from ..type import P115StrID

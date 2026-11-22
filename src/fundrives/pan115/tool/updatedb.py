@@ -14,8 +14,8 @@ from os import PathLike
 from time import time
 from typing import overload, Any, Literal
 
-from asynctools import ensure_async
-from iterutils import (
+from fundrives.pan115._vendor.asynctools import ensure_async
+from fundrives.pan115._vendor.iterutils import (
     chunked,
     foreach,
     run_gen_step,
@@ -24,7 +24,14 @@ from iterutils import (
     Yield,
 )
 from orjson import dumps
-from sqlitetools import connect, executescript, execute, find, query, upsert_items
+from fundrives.pan115._vendor.sqlitetools import (
+    connect,
+    executescript,
+    execute,
+    find,
+    query,
+    upsert_items,
+)
 
 from ..client import P115Client
 from .history import iter_history_list

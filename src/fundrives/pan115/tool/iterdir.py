@@ -74,13 +74,13 @@ from types import EllipsisType
 from typing import cast, overload, Any, Literal
 from warnings import warn
 
-from asynctools import async_collect
-from concurrenttools import run_as_thread, conmap
+from fundrives.pan115._vendor.asynctools import async_collect
+from fundrives.pan115._vendor.concurrenttools import run_as_thread, conmap
 from fundrives.pan115._vendor.dicttools import get_first
 from fundrives.pan115._vendor.errno2 import errno
-from http_response import is_timeouterror
-from iterdir import iterdir_generic, walk_generic
-from iterutils import (
+from fundrives.pan115._vendor.http_response import is_timeouterror
+from fundrives.pan115._vendor.iterdir import iterdir_generic, walk_generic
+from fundrives.pan115._vendor.iterutils import (
     bfs_gen,
     chunked,
     chain,

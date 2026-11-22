@@ -32,23 +32,23 @@ from itertools import count, dropwhile
 from os import fsdecode, PathLike
 from typing import cast, overload, Any, Literal, NamedTuple
 
-from asynctools import async_collect
+from fundrives.pan115._vendor.asynctools import async_collect
 
 try:
-    from concurrenttools import taskgroup_map, threadpool_map
+    from fundrives.pan115._vendor.concurrenttools import taskgroup_map, threadpool_map
 except ImportError:
-    from concurrenttools import (
+    from fundrives.pan115._vendor.concurrenttools import (
         async_conmap as taskgroup_map,
         thread_conmap as threadpool_map,
     )
 from fundrives.pan115._vendor.dicttools import get_first
 from fundrives.pan115._vendor.dicttools import dict_map
 from fundrives.pan115._vendor.errno2 import errno
-from filewrap import SupportsRead
-from hashtools import file_mdigest, file_mdigest_async
-from http_request import SupportsGeturl
-from http_response import get_total_length
-from iterutils import (
+from fundrives.pan115._vendor.filewrap import SupportsRead
+from fundrives.pan115._vendor.hashtools import file_mdigest, file_mdigest_async
+from fundrives.pan115._vendor.http_request import SupportsGeturl
+from fundrives.pan115._vendor.http_response import get_total_length
+from fundrives.pan115._vendor.iterutils import (
     as_gen_step,
     foreach,
     run_gen_step,
@@ -57,7 +57,7 @@ from iterutils import (
     Yield,
     YieldFrom,
 )
-from p115oss import (
+from fundrives.pan115._vendor.p115oss import (
     upload_file_init,
     oss_multipart_upload_init,
     oss_multipart_upload_complete,
@@ -1421,7 +1421,7 @@ class P115MultipartUpload:
         """
 
         def gen_step():
-            from p115oss.api import _upload_token
+            from fundrives.pan115._vendor.p115oss.api import _upload_token
 
             token = yield _upload_token(async_=async_)
             result = yield oss_multipart_upload_url(
@@ -1521,14 +1521,14 @@ class P115MultipartUpload:
                     file = yield file
             elif path.startswith(("https://", "https://")):
                 if async_:
-                    from httpfile import AsyncHTTPFileReader
+                    from fundrives.pan115._vendor.httpfile import AsyncHTTPFileReader
 
                     async def process():
                         return await AsyncHTTPFileReader.new(path, start=skipsize)
 
                     file = yield process()
                 else:
-                    from httpfile import HTTPFileReader
+                    from fundrives.pan115._vendor.httpfile import HTTPFileReader
 
                     file = HTTPFileReader(path, start=skipsize)
             else:

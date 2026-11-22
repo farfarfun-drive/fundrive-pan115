@@ -21,7 +21,7 @@ from os import PathLike
 from time import time, sleep
 from typing import overload, Any, Final, Literal
 
-from iterutils import run_gen_step_iter, with_iter_next, Yield
+from fundrives.pan115._vendor.iterutils import run_gen_step_iter, with_iter_next, Yield
 
 from ..client import check_response, P115Client
 

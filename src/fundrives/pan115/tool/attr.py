@@ -47,7 +47,7 @@ from fundrives.pan115._vendor.dictattr import AttrDict
 from fundrives.pan115._vendor.dicttools import get_first
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.integer_tool import try_parse_int
-from iterutils import as_gen_step, run_gen_step, with_iter_next
+from fundrives.pan115._vendor.iterutils import as_gen_step, run_gen_step, with_iter_next
 from fundrives.pan115._vendor.p115pickcode import to_id, get_stable_point
 from fundrives.pan115._vendor.posixpatht import path_is_dir_form, splitext, splits
 

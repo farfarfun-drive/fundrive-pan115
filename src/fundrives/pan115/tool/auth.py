@@ -8,7 +8,7 @@ from collections.abc import Callable, Coroutine
 from os import PathLike
 from typing import overload, Any, Literal
 
-from iterutils import run_gen_step
+from fundrives.pan115._vendor.iterutils import run_gen_step
 
 from ..client import check_response, P115Client, P115OpenClient
 

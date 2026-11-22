@@ -22,7 +22,11 @@ from os import PathLike
 from typing import cast, overload, Any, Literal
 
 from fundrives.pan115._vendor.dicttools import get_first
-from iterutils import run_gen_step, run_gen_step_iter, YieldFrom
+from fundrives.pan115._vendor.iterutils import (
+    run_gen_step,
+    run_gen_step_iter,
+    YieldFrom,
+)
 
 from ..client import P115Client, check_response
 

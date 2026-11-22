@@ -9,9 +9,9 @@ from typing import cast, overload, Any
 
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.iter_collect import grouped_mapping
-from iterutils import bfs_gen
+from fundrives.pan115._vendor.iterutils import bfs_gen
 from fundrives.pan115._vendor.posixpatht import path_is_dir_form, escape, splits
-from sqlitetools import connect, find, query
+from fundrives.pan115._vendor.sqlitetools import connect, find, query
 
 from ..util import posix_escape_name
 

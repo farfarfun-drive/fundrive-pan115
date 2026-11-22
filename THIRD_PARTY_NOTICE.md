@@ -12,12 +12,13 @@
 
 ## 内置纯 Python 工具微包（`src/fundrives/pan115/_vendor/`）
 
-为避免上游微包高频不兼容变更，下列同作者（ChenyangGao）的 MIT 协议纯 Python 工具模块已内联至 `src/fundrives/pan115/_vendor/` 并随本仓库自主维护：
+为彻底摆脱上游微包高频不兼容变更，下列同作者（ChenyangGao）的 35 个 MIT 协议工具模块已全部内联至 `src/fundrives/pan115/_vendor/` 并随本仓库自主维护：
 
-- `p115pickcode` (`0.0.5.4`)、`errno2` (`0.0.5`)、`posixpatht` (`0.0.4`)、`glob_pattern` (`0.0.2`)
-- `python-undefined` (`0.0.4`)、`python-startfile` (`0.0.3`)、`python-property` (`0.0.3`)、`id2dirnode` (`0.0.2`)
-- `python-dictattr` (`0.0.4`)、`python-temporary` (`0.0.1`)、`python-argtools` (`0.0.4`)、`integer_tool` (`0.0.6.1`)
-- `python-ensure` (`0.0.2`)、`cachedict` (`0.0.7`)、`python-dicttools` (`0.0.5`)、`python-cookietools` (`0.1.5`)、`iter_collect` (`0.0.6`)
+- 核心协议与加密：`p115cipher` (`0.0.5.4`)、`p115oss` (`0.1.2`)、`p115pickcode` (`0.0.5.4`)、`ed2k` (`0.0.2.2`)
+- HTTP 与下载：`http_response` (`0.0.9`)、`python-http_request` (`0.1.7.1`)、`python-httpfile` (`0.0.6.1`)、`python-download` (`0.0.4.1`)、`urllib3_future_request` (`0.0.2`)、`socket_keepalive` (`0.0.1`)
+- 异步、并发与迭代：`python-asynctools` (`0.2.2`)、`python-concurrenttools` (`0.1.8`)、`python-iterutils` (`0.3.1.1`)、`iter_collect` (`0.0.6`)、`iterdir` (`0.0.10`)、`python-decotools` (`0.0.4`)
+- 文件、路径与数据工具：`python-filewrap` (`0.3.1.1`)、`python-hashtools` (`0.0.6`)、`sqlitetools` (`0.1.3`)、`errno2` (`0.0.5`)、`posixpatht` (`0.0.4`)、`glob_pattern` (`0.0.2`)、`id2dirnode` (`0.0.2`)、`python-texttools` (`0.0.6`)
+- 通用小工具：`cachedict` (`0.0.7`)、`python-cookietools` (`0.1.5`)、`python-dictattr` (`0.0.4`)、`python-dicttools` (`0.0.5`)、`python-argtools` (`0.0.4`)、`integer_tool` (`0.0.6.1`)、`python-ensure` (`0.0.2`)、`python-property` (`0.0.3`)、`python-startfile` (`0.0.3`)、`python-temporary` (`0.0.1`)、`python-undefined` (`0.0.4`)
 
 以上模块均采用与下述相同的 MIT 许可证。
 

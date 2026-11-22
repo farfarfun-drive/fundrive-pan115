@@ -25,8 +25,8 @@ from os import PathLike
 from threading import Lock
 from time import time
 
-from http_response import get_status_code, is_timeouterror
-from iterutils import run_gen_step
+from fundrives.pan115._vendor.http_response import get_status_code, is_timeouterror
+from fundrives.pan115._vendor.iterutils import run_gen_step
 
 from ..client import check_response, P115Client
 from ..exception import P115OSError, P115AuthenticationError, P115LoginError

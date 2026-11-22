@@ -21,7 +21,12 @@ from typing import overload, Any, Literal
 from fundrives.pan115._vendor.dictattr import AttrDict
 from fundrives.pan115._vendor.dicttools import dict_key_to_lower_update
 from fundrives.pan115._vendor.errno2 import errno
-from iterutils import run_gen_step, run_gen_step_iter, with_iter_next, Yield
+from fundrives.pan115._vendor.iterutils import (
+    run_gen_step,
+    run_gen_step_iter,
+    with_iter_next,
+    Yield,
+)
 
 from ..client import check_response, P115Client
 from ..exception import throw
