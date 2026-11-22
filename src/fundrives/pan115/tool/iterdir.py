@@ -760,8 +760,8 @@ def iter_file_list(
 
         .. code:: python
 
-            from fundrives.p115 import P115Client
-            from fundrives.p115.tool import iter_file_list
+            from fundrives.pan115 import P115Client
+            from fundrives.pan115.tool import iter_file_list
 
             client = P115Client.from_path()
 
@@ -776,8 +776,8 @@ def iter_file_list(
 
         .. code:: python
 
-            from fundrives.p115 import P115Client
-            from fundrives.p115.tool.iterdir import iter_file_list
+            from fundrives.pan115 import P115Client
+            from fundrives.pan115.tool.iterdir import iter_file_list
             client = P115Client.from_path()
 
             folders = list(iter_file_list(client, {"aid": 120, "nf": 1}, max_workers=None))
@@ -3879,8 +3879,8 @@ def iter_keyed_ids[K](
 
         .. code:: python
 
-            from fundrives.p115 import P115Client
-            from fundrives.p115.tool import *
+            from fundrives.pan115 import P115Client
+            from fundrives.pan115.tool import *
             client = P115Client.from_path()
 
             # NOTE: cid1 是作为基准的目录 id，其它目录中是否有重复文件以此为准
@@ -5376,7 +5376,7 @@ def extract_iter_files(
 def iter_id_to_dirnode(
     key: int | str | PathLike | P115Client | P115OpenClient,
 ) -> Iterator[tuple[int, DirNode]]:
-    """用指定 key 查询缓存 ``fundrives.p115.const.ID_TO_DIRNODE_CACHE``，迭代返回结果
+    """用指定 key 查询缓存 ``fundrives.pan115.const.ID_TO_DIRNODE_CACHE``，迭代返回结果
 
     :param key: 分享码或者用户 id（或者 115 客户端或 cookies，然后间接获取用户 id)
 

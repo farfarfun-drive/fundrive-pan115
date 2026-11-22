@@ -1,10 +1,10 @@
-"""fundrive-p115 基础冒烟与契约测试。"""
+"""fundrive-pan115 基础冒烟与契约测试。"""
 
 import importlib
 import pathlib
 
 import fundrives
-from fundrives.p115 import (
+from fundrives.pan115 import (
     P115AuthenticationError,
     P115Client,
     P115Error,
@@ -24,12 +24,12 @@ def test_pep420_namespace_has_no_init_file():
 def test_public_exports_and_subpackages():
     """核心导出和子包都应可正常导入。"""
     assert P115Client is not None
-    assert importlib.import_module("fundrives.p115.client") is not None
-    assert importlib.import_module("fundrives.p115.const") is not None
-    assert importlib.import_module("fundrives.p115.exception") is not None
-    assert importlib.import_module("fundrives.p115.fs") is not None
-    assert importlib.import_module("fundrives.p115.tool") is not None
-    assert importlib.import_module("fundrives.p115.util") is not None
+    assert importlib.import_module("fundrives.pan115.client") is not None
+    assert importlib.import_module("fundrives.pan115.const") is not None
+    assert importlib.import_module("fundrives.pan115.exception") is not None
+    assert importlib.import_module("fundrives.pan115.fs") is not None
+    assert importlib.import_module("fundrives.pan115.tool") is not None
+    assert importlib.import_module("fundrives.pan115.util") is not None
 
 
 def test_exception_hierarchy():

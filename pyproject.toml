@@ -1,5 +1,5 @@
 [project]
-name = "fundrive-p115"
+name = "fundrive-pan115"
 version = "2.0.91"
 description = "115网盘（p115client）云存储 API 封装"
 readme = "README.md"
@@ -64,8 +64,8 @@ email = "farfarfun@qq.com"
 
 [project.urls]
 Organization = "https://github.com/farfarfun-drive"
-Repository = "https://github.com/farfarfun-drive/fundrive-p115"
-Releases = "https://github.com/farfarfun-drive/fundrive-p115/releases"
+Repository = "https://github.com/farfarfun-drive/fundrive-pan115"
+Releases = "https://github.com/farfarfun-drive/fundrive-pan115/releases"
 
 [build-system]
 requires = ["hatchling"]
@@ -112,9 +112,9 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# src/fundrives/p115/ 为从上游 p115client 0.0.9.6.5.1 完整搬运的派生源码，
+# src/fundrives/pan115/ 为从上游 p115client 0.0.9.6.5.1 完整搬运的派生源码，
 # 短期保持原始行为与签名不变；后续逐步重构和去除微包依赖时同步收紧这里的忽略项。
-"src/fundrives/p115/**/*.py" = [
+"src/fundrives/pan115/**/*.py" = [
     "B006", "B007", "B008", "B010", "B012", "B018", "B020", "B023", "B028", "B905",
     "E402", "E701", "E722", "E731",
     "F401", "F403", "F405", "F541", "F841",

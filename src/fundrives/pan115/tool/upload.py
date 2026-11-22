@@ -1040,8 +1040,8 @@ class P115MultipartUpload:
     .. code::
 
         from pathlib import Path
-        from fundrives.p115 import P115Client
-        from fundrives.p115.tool import P115MultipartUpload
+        from fundrives.pan115 import P115Client
+        from fundrives.pan115.tool import P115MultipartUpload
 
         client = P115Client(Path("~/115-cookies.txt").expanduser())
 

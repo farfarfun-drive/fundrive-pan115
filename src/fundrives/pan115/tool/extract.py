@@ -73,8 +73,8 @@ def extract_push(
         .. code:: python
 
             from time import sleep
-            from fundrives.p115 import P115Client
-            from fundrives.p115.tool import *
+            from fundrives.pan115 import P115Client
+            from fundrives.pan115.tool import *
             client = P115Client.from_path()
 
             # NOTE: 待搜索的目录
@@ -248,7 +248,7 @@ def extract_iterdir_raw(
     """对压缩包迭代目录，获取（原始的）文件信息
 
     .. note::
-        你可以使用 ``fundrives.p115.tool.extract_iterdir`` 作为替代，以获取经过处理的信息
+        你可以使用 ``fundrives.pan115.tool.extract_iterdir`` 作为替代，以获取经过处理的信息
 
     :param client:    115 客户端或 cookies
     :param pickcode:  压缩包文件的 提取码、id

@@ -988,7 +988,7 @@ class ClientRequestMixin:
             .. code:: python
 
                 from base64 import b64decode
-                from fundrives.p115 import P115Client
+                from fundrives.pan115 import P115Client
 
                 resp = P115Client.app_publick_key()
                 perm = b64decode(resp["data"]["key"])
@@ -1608,7 +1608,7 @@ class ClientRequestMixin:
 
             .. code:: python
 
-                from fundrives.p115 import P115Client
+                from fundrives.pan115 import P115Client
 
                 app_id = 100195125
                 response = P115Client.login_qrcode_token_open(app_id)
@@ -1623,7 +1623,7 @@ class ClientRequestMixin:
             .. code:: python
 
                 from itertools import count
-                from fundrives.p115 import P115Client
+                from fundrives.pan115 import P115Client
 
                 get_qrcode_token = P115Client.login_qrcode_token_open
                 for app_id in count(100195125, 2):
@@ -7382,8 +7382,8 @@ class P115Client(P115OpenClient):
 
             .. code:: python
 
-                from fundrives.p115 import P115Client
-                from fundrives.p115.tool import *
+                from fundrives.pan115 import P115Client
+                from fundrives.pan115.tool import *
                 client = P115Client.from_path()
 
                 while True:
@@ -9232,7 +9232,7 @@ class P115Client(P115OpenClient):
 
                 .. code:: python
 
-                    from fundrives.p115 import check_response, P115Client
+                    from fundrives.pan115 import check_response, P115Client
 
                     client = P115Client.from_path()
 
@@ -9257,7 +9257,7 @@ class P115Client(P115OpenClient):
 
                 .. code:: python
 
-                    from fundrives.p115.tool import batch_delete, iter_download_files
+                    from fundrives.pan115.tool import batch_delete, iter_download_files
 
                     empty_file_hash = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709"
                     files = (
@@ -10585,7 +10585,7 @@ class P115Client(P115OpenClient):
 
                 from pathlib import Path
                 from itertools import batched
-                from fundrives.p115 import P115Client
+                from fundrives.pan115 import P115Client
 
                 client = P115Client(Path("~/115-cookies.txt").expanduser())
                 while True:

@@ -1,6 +1,6 @@
 # 第三方代码来源与协议
 
-本仓库在 MIT 协议下发布（见 [LICENSE](LICENSE)），其中 `src/fundrives/p115/` 下的源码完整派生自下列第三方项目，按协议要求保留其原始版权与许可声明。
+本仓库在 MIT 协议下发布（见 [LICENSE](LICENSE)），其中 `src/fundrives/pan115/` 下的源码完整派生自下列第三方项目，按协议要求保留其原始版权与许可声明。
 
 ## p115client
 
@@ -8,7 +8,7 @@
 - PyPI 包名：[`p115client`](https://pypi.org/project/p115client/)
 - 迁入基准版本：`0.0.9.6.5.1`
 - 原始协议：MIT（与本仓库的 MIT 兼容）
-- 涉及的文件：`src/fundrives/p115/` 下的全部模块
+- 涉及的文件：`src/fundrives/pan115/` 下的全部模块
 
 ### 原始许可证全文
 

@@ -23,7 +23,7 @@ __all__ = [
     "set_user_key",
     "normalize_pickcode",
 ]
-__doc__ = "这个模块提供了一些工具函数，且不依赖于 fundrives.p115.client 中的实现"
+__doc__ = "这个模块提供了一些工具函数，且不依赖于 fundrives.pan115.client 中的实现"
 
 from asyncio import sleep as async_sleep
 from collections import UserDict

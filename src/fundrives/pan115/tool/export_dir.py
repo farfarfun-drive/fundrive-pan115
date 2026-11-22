@@ -312,7 +312,7 @@ def export_dir_parse_iter_path(
         if escape:
             from posixpatht import escape
         else:
-            from fundrives.p115.util import posix_escape_name as escape
+            from fundrives.pan115.util import posix_escape_name as escape
     escape = cast(None | Callable[[str], str], escape)
 
     def gen_step():

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
-from fundrives.p115.util import *
+from fundrives.pan115.util import *
 
 from .attr import *
 from .auth import *

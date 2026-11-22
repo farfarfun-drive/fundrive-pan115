@@ -1,22 +1,22 @@
-# fundrive-p115
+# fundrive-pan115
 
-115 网盘 Python API 封装（`fundrives.p115`），从上游 [`p115client`](https://github.com/ChenyangGao/p115client)（`0.0.9.6.5.1`）完整迁入并自主维护，供 [fundrive](https://github.com/farfarfun-drive/fundrive) 及其他项目以统一命名空间稳定接入 115 网盘，避免受上游高频破坏性变更影响。
+115 网盘 Python API 封装（`fundrives.pan115`），从上游 [`p115client`](https://github.com/ChenyangGao/p115client)（`0.0.9.6.5.1`）完整迁入并自主维护，供 [fundrive](https://github.com/farfarfun-drive/fundrive) 及其他项目以统一命名空间稳定接入 115 网盘，避免受上游高频破坏性变更影响。
 
 ## 安装
 
 本项目要求 Python 3.12 或更高版本。
 
 ```bash
-pip install fundrive-p115
+pip install fundrive-pan115
 # 或
-uv add fundrive-p115
+uv add fundrive-pan115
 ```
 
 ## 快速开始
 
 ```python
 from pathlib import Path
-from fundrives.p115 import P115Client
+from fundrives.pan115 import P115Client
 
 # 方式一：使用 Cookie 字符串
 client = P115Client(cookies="UID=...; CID=...; SEID=...; KID=...")
@@ -49,7 +49,7 @@ uv build
 
 ## 演进路线
 
-1. **短期（当前）**：完整迁入 `p115client 0.0.9.6.5.1` 至 `fundrives.p115` 命名空间，保持 API 100% 兼容，隔离上游高频改动。
+1. **短期（当前）**：完整迁入 `p115client 0.0.9.6.5.1` 至 `fundrives.pan115` 命名空间，保持 API 100% 兼容，隔离上游高频改动。
 2. **长期**：逐步内联或替换外围微包依赖（`p115cipher` / `p115oss` / `p115pickcode` / `python-*` 等）到自有工具包中，收敛依赖面并逐步收紧 `per-file-ignores`。
 
 ## 命名空间说明
@@ -58,7 +58,7 @@ uv build
 
 ## 来源说明与第三方协议
 
-`src/fundrives/p115/` 源码派生自 [p115client](https://github.com/ChenyangGao/p115client)（版本 `0.0.9.6.5.1`），原始协议为 **MIT，Copyright (c) 2024 ChenyangGao**。完整声明见 [THIRD_PARTY_NOTICE.md](THIRD_PARTY_NOTICE.md)。
+`src/fundrives/pan115/` 源码派生自 [p115client](https://github.com/ChenyangGao/p115client)（版本 `0.0.9.6.5.1`），原始协议为 **MIT，Copyright (c) 2024 ChenyangGao**。完整声明见 [THIRD_PARTY_NOTICE.md](THIRD_PARTY_NOTICE.md)。
 
 ---
 

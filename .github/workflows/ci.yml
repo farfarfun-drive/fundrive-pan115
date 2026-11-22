@@ -37,7 +37,7 @@ jobs:
         run: |
           PY="$PWD/.venv/bin/python"
           cd "$(mktemp -d)"
-          "$PY" -c "import fundrives.p115 as m; assert hasattr(m, 'P115Client'); print('OK', m.__file__)"
+          "$PY" -c "import fundrives.pan115 as m; assert hasattr(m, 'P115Client'); print('OK', m.__file__)"
 
   build:
     runs-on: ubuntu-latest

@@ -509,8 +509,8 @@ def updatedb_event_iter(
     .. code::
 
         from time import sleep
-        from fundrives.p115 import P115Client
-        from fundrives.p115.tool import updatedb_life_iter
+        from fundrives.pan115 import P115Client
+        from fundrives.pan115.tool import updatedb_life_iter
 
         client = P115Client.from_path()
 
