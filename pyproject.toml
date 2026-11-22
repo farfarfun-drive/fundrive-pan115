@@ -1,0 +1,125 @@
+[project]
+name = "fundrive-p115"
+version = "2.0.91"
+description = "115网盘（p115client）云存储 API 封装"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICE.md"]
+dependencies = [
+    "cachedict>=0.0.7",
+    "ed2k>=0.0.2.2",
+    "errno2>=0.0.5",
+    "filelock",
+    "glob_pattern>=0.0.2",
+    "http_response>=0.0.9",
+    "id2dirnode>=0.0.2",
+    "integer_tool>=0.0.6.1",
+    "iter_collect>=0.0.6",
+    "iterdir>=0.0.10",
+    "orjson",
+    "p115cipher>=0.0.5.4",
+    "p115oss>=0.1.2",
+    "p115pickcode>=0.0.5.4",
+    "posixpatht>=0.0.4",
+    "python-argtools>=0.0.4",
+    "python-asynctools>=0.2.2",
+    "python-concurrenttools>=0.1.8",
+    "python-cookietools>=0.1.5",
+    "python-dictattr>=0.0.4",
+    "python-dicttools>=0.0.5",
+    "python-download>=0.0.4.1",
+    "python-encode_uri>=0.0.3",
+    "python-ensure>=0.0.1",
+    "python-filewrap>=0.3.1.1",
+    "python-hashtools>=0.0.6",
+    "python-http_request>=0.1.7.1",
+    "python-httpfile>=0.0.6.1",
+    "python-iterutils>=0.3.1.1",
+    "python-property>=0.0.3",
+    "python-startfile>=0.0.3",
+    "python-temporary>=0.0.1",
+    "python-undefined>=0.0.4",
+    "qrcode",
+    "sqlitetools>=0.1.3",
+    "urllib3_future_request>=0.0.2",
+    "yarl",
+]
+
+[[project.authors]]
+name = "牛哥"
+email = "niuliangtao@qq.com"
+
+[[project.authors]]
+name = "farfarfun"
+email = "farfarfun@qq.com"
+
+[[project.maintainers]]
+name = "牛哥"
+email = "niuliangtao@qq.com"
+
+[[project.maintainers]]
+name = "farfarfun"
+email = "farfarfun@qq.com"
+
+[project.urls]
+Organization = "https://github.com/farfarfun-drive"
+Repository = "https://github.com/farfarfun-drive/fundrive-p115"
+Releases = "https://github.com/farfarfun-drive/fundrive-p115/releases"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fundrives"]
+
+[dependency-groups]
+dev = ["pytest>=8.0.0", "ruff>=0.14.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py312"
+src = ["src", "tests"]
+extend-exclude = ["*.md"]
+
+# ---------------------------------------------------------------------------
+# 以下 select / ignore 是 fundrive 工作区各仓库**共用的基线**，逐字相同。
+# 改动任何一条都要同步到全部仓库，否则 scripts/check-lint-baseline.sh 会拦截。
+# 基线的取舍记录在 fundrive-dev 的 docs/project/project-governance/
+# 004-known-deviations.md 第 6 条。
+# ---------------------------------------------------------------------------
+[tool.ruff.lint]
+select = [
+    "E4", "E7", "E9",  # pycodestyle 里真正是错误的那部分
+    "F",               # pyflakes
+    "I",               # import 排序
+    "UP",              # 过时写法
+    "B",               # bugbear
+    "SIM",             # 可简化的写法
+    "RET",             # return 路径
+    "C4",              # 推导式与字面量
+    "PLE",             # pylint 的 error 级
+    "T100",            # 漏在代码里的 breakpoint()
+    "S102",            # exec()
+]
+ignore = [
+    "E501",
+    "PLE1205",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# src/fundrives/p115/ 为从上游 p115client 0.0.9.6.5.1 完整搬运的派生源码，
+# 短期保持原始行为与签名不变；后续逐步重构和去除微包依赖时同步收紧这里的忽略项。
+"src/fundrives/p115/**/*.py" = [
+    "B006", "B007", "B008", "B010", "B012", "B018", "B020", "B023", "B028", "B905",
+    "E402", "E701", "E722", "E731",
+    "F401", "F403", "F405", "F541", "F841",
+    "I001",
+    "RET503", "RET505", "RET506", "RET508",
+    "SIM102", "SIM105", "SIM108", "SIM114", "SIM115",
+    "UP009", "UP031", "UP035",
+]
