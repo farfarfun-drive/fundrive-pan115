@@ -186,19 +186,21 @@ class HTTPFileReader[Response](RawIOBase, BinaryIO):
 
     def _init_info(self, /, key: str = "length"):
         response = self.__dict__.get("response")
+        opened_probe = False
         if response is None:
-            from fundrives.pan115._request import (
-                request_sync as request,
-            )
-
-            request_kwargs = dict(self.request_kwargs, parse=...)
+            request_kwargs = dict(self.request_kwargs)
             headers = request_kwargs["headers"] = dict(
                 request_kwargs.get("headers") or ()
             )
             headers["range"] = "bytes=0-0"
-            response = request(self._geturl(), **request_kwargs)
-        self._seekable = not is_range_request(response)
-        self.length = coalesce(get_total_length(response), -1)
+            response = self.request(self._geturl(), **request_kwargs)
+            opened_probe = True
+        try:
+            self._seekable = is_range_request(response)
+            self.length = coalesce(get_total_length(response), -1)
+        finally:
+            if opened_probe and hasattr(response, "close"):
+                response.close()
         match key:
             case "length":
                 return self.length
@@ -843,19 +845,28 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
 
     async def _init_info(self, /, key: str = "length"):
         response = self.__dict__.get("response")
+        opened_probe = False
         if response is None:
-            from fundrives.pan115._request import (
-                request_async as request,
-            )
-
-            request_kwargs = dict(self.request_kwargs, parse=...)
+            request_kwargs = dict(self.request_kwargs)
             headers = request_kwargs["headers"] = dict(
                 request_kwargs.get("headers") or ()
             )
             headers["range"] = "bytes=0-0"
-            response = await request(await self._geturl(), **request_kwargs)
-        self._seekable = not is_range_request(response)
-        self.length = coalesce(get_total_length(response), -1)
+            response = await self.request(await self._geturl(), **request_kwargs)
+            opened_probe = True
+        try:
+            self._seekable = is_range_request(response)
+            self.length = coalesce(get_total_length(response), -1)
+        finally:
+            if opened_probe:
+                if hasattr(response, "aclose"):
+                    res = response.aclose()
+                    if isawaitable(res):
+                        await res
+                elif hasattr(response, "close"):
+                    res = response.close()
+                    if isawaitable(res):
+                        await res
         match key:
             case "length":
                 return self.length
@@ -1181,10 +1192,14 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
     async def reconnect(self, /, start: None | int = None) -> int:
         if start is None:
             start = self._pos
-        if start and not self.seekable():
-            raise OSError(
-                errno.EOPNOTSUPP, "unsupport for reconnection of non-seekable streams"
-            )
+        if start:
+            if "_seekable" not in self.__dict__:
+                await self._init_info("seekable")
+            if not self.seekable():
+                raise OSError(
+                    errno.EOPNOTSUPP,
+                    "unsupport for reconnection of non-seekable streams",
+                )
         request_kwargs = self.request_kwargs
         headers = request_kwargs["headers"] = request_kwargs["headers"]
         if start >= 0:
@@ -1214,6 +1229,8 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
         return start
 
     async def seek(self, pos: int, whence: int = 0, /) -> int:  # type: ignore
+        if "_seekable" not in self.__dict__:
+            await self._init_info("seekable")
         if not self.seekable():
             raise OSError(errno.EINVAL, "not a seekable stream")
         old_pos = self._pos
@@ -1489,13 +1506,11 @@ class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
         else:
             urls = list(urls)  # type: ignore
 
-        from fundrives.pan115._request import request_sync
-
         self._parts: list[dict] = []
         add_part = self._parts.append
         seekable = True
         length = 0
-        request_kwargs = dict(request_kwargs, parse=...)
+        request_kwargs = dict(request_kwargs)
         headers = request_kwargs["headers"] = dict(request_kwargs.get("headers") or ())
         headers["range"] = "bytes=0-0"
         for url in urls:
@@ -1509,10 +1524,14 @@ class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
                     url_ = url_.geturl()
                 else:
                     url_ = str(url_)
-                resp = request_sync(url_, **request_kwargs)
-                if not is_range_request(resp):
-                    seekable = False
-                size = get_total_length(resp) or 0
+                resp = self.request(url_, **request_kwargs)
+                try:
+                    if not is_range_request(resp):
+                        seekable = False
+                    size = get_total_length(resp) or 0
+                finally:
+                    if hasattr(resp, "close"):
+                        resp.close()
             if size:
                 start = length
                 length += size
@@ -1648,10 +1667,6 @@ class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
         return bytes(buf)
 
     def readinto_range(self, buffer: Buffer, /, offset: int = 0):
-        from fundrives.pan115._request import (
-            request_sync as request,
-        )
-
         if offset < 0:
             offset += self.length
             if offset < 0:
@@ -1669,7 +1684,7 @@ class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
                 if vol["start"] <= offset < vol["stop"]:
                     vol_offset = offset + size - vol["start"]
                     headers["range"] = f"bytes={vol_offset}-"
-                    resp = request(vol["url"], **request_kwargs)
+                    resp = self.request(vol["url"], **request_kwargs)
                     try:
                         if vol_offset and resp.headers.get("accept-ranges") != "bytes":
                             raise OSError(29, "non-seekable stream")
@@ -1859,23 +1874,31 @@ class AsyncMultipartHTTPFileReader[Response](AsyncHTTPFileReader[Response]):
         else:
             urls = list(urls)  # type: ignore
 
-        from fundrives.pan115._request import request_async
-
         self._parts: list[dict] = []
         add_part = self._parts.append
         seekable = True
         length = 0
-        request_kwargs = dict(request_kwargs, parse=...)
+        request_kwargs = dict(request_kwargs)
         headers = request_kwargs["headers"] = dict(request_kwargs.get("headers") or ())
         headers["range"] = "bytes=0-0"
         for url in urls:
             if isinstance(url, tuple):
                 size, url = url
             else:
-                resp = await request_async(await ageturl(url), **request_kwargs)
-                if not is_range_request(resp):
-                    seekable = False
-                size = get_total_length(resp) or 0
+                resp = await self.request(await ageturl(url), **request_kwargs)
+                try:
+                    if not is_range_request(resp):
+                        seekable = False
+                    size = get_total_length(resp) or 0
+                finally:
+                    if hasattr(resp, "aclose"):
+                        res = resp.aclose()
+                        if isawaitable(res):
+                            await res
+                    elif hasattr(resp, "close"):
+                        res = resp.close()
+                        if isawaitable(res):
+                            await res
             if size:
                 start = length
                 length += size
@@ -2076,8 +2099,6 @@ class AsyncMultipartHTTPFileReader[Response](AsyncHTTPFileReader[Response]):
         return bytes(buf)
 
     async def readinto_range(self, buffer: Buffer, /, offset: int = 0):
-        from fundrives.pan115._request import request_async
-
         if offset < 0:
             offset += self.length
             if offset < 0:
@@ -2095,7 +2116,7 @@ class AsyncMultipartHTTPFileReader[Response](AsyncHTTPFileReader[Response]):
                 if vol["start"] <= offset < vol["stop"]:
                     vol_offset = offset + size - vol["start"]
                     headers["range"] = f"bytes={vol_offset}-"
-                    resp = await request_async(vol["url"], **request_kwargs)
+                    resp = await self.request(vol["url"], **request_kwargs)
                     try:
                         if vol_offset and resp.headers.get("accept-ranges") != "bytes":
                             raise OSError(29, "non-seekable stream")

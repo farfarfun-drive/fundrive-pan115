@@ -224,7 +224,13 @@ def run_gen_step_iter_sync(
                 v = yield from v.value
         raise CancelledError
     except StopIteration as e:
-        return e.value
+        v = e.value
+        if isinstance(v, Yield):
+            yield v.value
+        elif isinstance(v, YieldFrom):
+            yield from v.value
+        else:
+            return v
     finally:
         gen.close()
 
@@ -266,9 +272,23 @@ async def run_gen_step_iter_async(
                 v = send(v)
     except StopIteration as e:
         v = e.value
-        if isawaitable(v):
-            v = await v
-        # return v
+        if isinstance(v, Yield):
+            v = v.value
+            if isawaitable(v):
+                v = await v
+            yield v
+        elif isinstance(v, YieldFrom):
+            v = v.value
+            if isawaitable(v):
+                v = await v
+            if isinstance(v, AsyncIterable):
+                async for item in v:
+                    yield item
+            else:
+                for item in v:
+                    yield item
+        elif isawaitable(v):
+            await v
     finally:
         gen.close()
 

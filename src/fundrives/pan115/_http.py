@@ -452,7 +452,7 @@ def cookie_header_for_url(cookies: Any, url: str, /) -> dict[str, str]:
                 continue
             if not _cookie_match_path(urlp.path, cookie.path):
                 continue
-            if cookie.expires and int(cookie.expires) <= now:
+            if cookie.expires is not None and int(cookie.expires) <= now:
                 continue
             data[name] = cookie.value or ""
         elif isinstance(cookie, Morsel):
@@ -461,7 +461,7 @@ def cookie_header_for_url(cookies: Any, url: str, /) -> dict[str, str]:
             if not _cookie_match_path(urlp.path, cookie.get("path")):
                 continue
             exp = _parse_expires(cookie.get("expires"))
-            if exp and exp <= now:
+            if exp is not None and exp <= now:
                 continue
             data[name] = cookie.value
         else:
@@ -505,13 +505,31 @@ def headers_get(
         headers = response
 
     if isinstance(headers, Mapping):
-        val = get(headers, key, default=None)
+        try:
+            val = get(headers, key, default=None)
+        except Exception:
+            val = None
         if val is None:
             alt: bytes | str = (
                 key.encode("latin-1") if isinstance(key, str) else key.decode("latin-1")
             )
-            val = get(headers, alt, default=None)
-            if val is None:
+            try:
+                val = get(headers, alt, default=None)
+            except Exception:
+                val = None
+        if val is None:
+            key_l = key.lower()
+            alt_l: bytes | str = (
+                key_l.encode("latin-1")
+                if isinstance(key_l, str)
+                else key_l.decode("latin-1")
+            )
+            for k, v in headers.items():
+                kl = k.lower() if hasattr(k, "lower") else k
+                if kl in (key_l, alt_l):
+                    val = v
+                    break
+            else:
                 return default
     else:
         key_l = key.lower()
@@ -754,10 +772,10 @@ def _urlencode(
 
 
 def complete_url(url: str, /, default_port: int = 0, params: Any = None) -> str:
-    if url.startswith("/"):
-        url = "http://localhost" + url
-    elif url.startswith("//"):
+    if url.startswith("//"):
         url = "http:" + url
+    elif url.startswith("/"):
+        url = "http://localhost" + url
     elif url.startswith("://"):
         url = "http" + url
     if not (params or default_port):
