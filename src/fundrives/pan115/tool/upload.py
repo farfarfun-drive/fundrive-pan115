@@ -33,7 +33,14 @@ from os import fsdecode, PathLike
 from typing import cast, overload, Any, Literal, NamedTuple
 
 from asynctools import async_collect
-from concurrenttools import threadpool_map, taskgroup_map
+
+try:
+    from concurrenttools import taskgroup_map, threadpool_map
+except ImportError:
+    from concurrenttools import (
+        async_conmap as taskgroup_map,
+        thread_conmap as threadpool_map,
+    )
 from dicttools import get_first
 from dicttools import dict_map
 from errno2 import errno
