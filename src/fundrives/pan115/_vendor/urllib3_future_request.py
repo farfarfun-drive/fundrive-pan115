@@ -280,7 +280,7 @@ def _get_default_pool() -> httpx.Client:
     global _DEFAULT_POOL
     if _DEFAULT_POOL is None or _DEFAULT_POOL.is_closed:
         _DEFAULT_POOL = httpx.Client(limits=_DEFAULT_LIMITS, follow_redirects=False)
-        setattr(_DEFAULT_POOL, "cookies", _DEFAULT_COOKIES)
+        _DEFAULT_POOL.cookies = _DEFAULT_COOKIES
     return _DEFAULT_POOL
 
 
@@ -290,7 +290,7 @@ def _get_default_async_pool() -> httpx.AsyncClient:
         _DEFAULT_ASYNC_POOL = httpx.AsyncClient(
             limits=_DEFAULT_LIMITS, follow_redirects=False
         )
-        setattr(_DEFAULT_ASYNC_POOL, "cookies", _DEFAULT_COOKIES)
+        _DEFAULT_ASYNC_POOL.cookies = _DEFAULT_COOKIES
     return _DEFAULT_ASYNC_POOL
 
 

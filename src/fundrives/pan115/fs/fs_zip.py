@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -16,24 +15,24 @@ from itertools import count
 from os import PathLike
 from posixpath import basename, dirname
 from threading import Lock
-from typing import overload, Any, Literal
+from typing import Any, Literal, overload
 
 from fundrives.pan115._vendor.dictattr import AttrDict
 from fundrives.pan115._vendor.dicttools import dict_key_to_lower_update
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.iterutils import (
+    Yield,
     run_gen_step,
     run_gen_step_iter,
     with_iter_next,
-    Yield,
 )
 
-from ..client import check_response, P115Client
+from ..client import P115Client, check_response
 from ..exception import throw
 from ..tool import extract_iter_files, extract_iterdir
 from ..type import P115URL
 from ..util import lock_as_async
-from .fs_base import IDOrPathType, P115PathBase, P115FileSystemBase
+from .fs_base import IDOrPathType, P115FileSystemBase, P115PathBase
 
 
 # TODO: 尽量也要兼容 zipfile.Path 的接口

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 4)
@@ -39,18 +38,18 @@ from collections.abc import Callable, Iterable, Iterator, Sequence
 from functools import partial
 from posixpath import (
     altsep,
+    commonprefix,
     curdir,
     extsep,
+    normcase,
     pardir,
     pathsep,
     sep,
-    commonprefix,
-    normcase,
     splitdrive,
 )
-from re import compile as re_compile, Match
-from typing import cast, Final
-
+from re import Match
+from re import compile as re_compile
+from typing import Final, cast
 
 CRE_DIR_END_search: Final = re_compile(r"(?P<bss>\\*)/\.{0,2}$").search
 CRE_PART_finditer: Final = re_compile(r"[^\\/]*(?:\\(?s:.)[^\\/]*)*").finditer
@@ -66,15 +65,13 @@ def path_is_dir_form(
     if slash_escaped:
         match = CRE_DIR_END_search(path)
         return match is not None and len(match["bss"]) % 2 == 0
-    else:
-        return path.endswith(("/", "/.", "/.."))
+    return path.endswith(("/", "/.", "/.."))
 
 
 def escape(name: str, /, parse_dots: bool = True) -> str:
     if parse_dots and name in (".", ".."):
         return "\\" + name
-    else:
-        return name.replace("\\", r"\\").replace("/", r"\/")
+    return name.replace("\\", r"\\").replace("/", r"\/")
 
 
 def unescape(name: str, /, parse_dots: bool = True) -> str:
@@ -310,7 +307,7 @@ def split(
 ) -> tuple[str, str]:
     if not path:
         return "", ""
-    elif not path.strip("/"):
+    if not path.strip("/"):
         return "/", ""
     return next(
         iter_split(
@@ -417,19 +414,17 @@ def relpath(
         if start_parents:
             if parents == start_parents:
                 return "."
-            elif parents > start_parents:
+            if parents > start_parents:
                 return ".." + "/.." * (parents - start_parents - 1)
-            else:
-                return "/".join(dirname_patht[max(1, len0 + parents - start_parents) :])
+            return "/".join(dirname_patht[max(1, len0 + parents - start_parents) :])
         return ".." + "/.." * (len2 + parents - 1)
-    elif start_parents:
+    if start_parents:
         return "/".join(dirname_patht[max(1, len0 - start_parents) :] + patht)
     for i, (p1, p2) in enumerate(zip(patht, start_patht)):
         if p1 != p2:
             return "../" * (len2 - i) + "/".join(patht[i:])
     if len1 == len2:
         return "."
-    elif len1 < len2:
+    if len1 < len2:
         return ".." + "/.." * (len2 - len1 - 1)
-    else:
-        return "/".join(patht[len2:])
+    return "/".join(patht[len2:])

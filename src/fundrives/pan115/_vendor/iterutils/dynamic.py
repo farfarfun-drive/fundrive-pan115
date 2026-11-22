@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = ["dynamic_async", "dynamic_async_iter"]
 
@@ -13,8 +12,8 @@ from fundrives.pan115._vendor.asynctools import (
     in_async,
     iter_async,
     run_async,
-    to_coroutine,
     to_aiter,
+    to_coroutine,
 )
 from fundrives.pan115._vendor.decotools import optional
 

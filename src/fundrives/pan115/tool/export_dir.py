@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "export_dir_parse_iter_depth_name",
@@ -28,19 +27,19 @@ from collections.abc import (
 from inspect import iscoroutinefunction
 from os import PathLike
 from time import sleep, time
-from typing import cast, overload, Any, Literal
+from typing import Any, Literal, cast, overload
 
 from fundrives.pan115._vendor.filewrap import SupportsRead
 from fundrives.pan115._vendor.iterutils import (
+    Yield,
+    YieldFrom,
     run_gen_step,
     run_gen_step_iter,
     with_iter_next,
-    Yield,
-    YieldFrom,
 )
 from fundrives.pan115._vendor.p115pickcode import to_id
 
-from ..client import check_response, P115Client
+from ..client import P115Client, check_response
 from ..exception import P115FileTooBig
 
 
@@ -198,8 +197,7 @@ def export_dir_iter_line(
         getattr(chunks, "read", None)
     ):
         return aiter_line_utf16(chunks, chunksize=chunksize)  # type: ignore
-    else:
-        return iter_line_utf16(chunks, chunksize=chunksize)  # type: ignore
+    return iter_line_utf16(chunks, chunksize=chunksize)  # type: ignore
 
 
 @overload
@@ -218,8 +216,7 @@ def export_dir_parse_iter_depth_name(
 ) -> Iterator[tuple[int, str]] | AsyncIterator[tuple[int, str]]:
     if isinstance(iterable, AsyncIterable):
         return export_dir_parse_iter_depth_name_async(iterable)
-    else:
-        return export_dir_parse_iter_depth_name_sync(iterable)
+    return export_dir_parse_iter_depth_name_sync(iterable)
 
 
 @overload

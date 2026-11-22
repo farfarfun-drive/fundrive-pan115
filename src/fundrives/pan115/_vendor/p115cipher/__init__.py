@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 5)
@@ -16,25 +15,23 @@ __all__ = [
 
 from base64 import b64decode, b64encode
 from binascii import b2a_hex, crc32
+from collections.abc import Buffer
 from hashlib import md5, sha1
 from time import time
+from typing import Final
 from urllib.parse import urlencode
 
-from collections.abc import Buffer
-from typing import Final
-
 from .util import (
-    from_bytes,
-    to_bytes,
-    rsa_encrypt_with_pubkey,
-    rsa_decrypt_with_pubkey,
-    xor,
-    rsa_gen_key,
-    aes_cbc_encrypt,
     aes_cbc_decrypt,
+    aes_cbc_encrypt,
+    from_bytes,
     lz4_decompress,
+    rsa_decrypt_with_pubkey,
+    rsa_encrypt_with_pubkey,
+    rsa_gen_key,
+    to_bytes,
+    xor,
 )
-
 
 CRC_SALT: Final = b"^j>WD3Kr?J2gLFjD4W2y@"
 MD5_SALT: Final = b"Qclm8MGWUv59TnrR0XPg"

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "to_coroutine",
@@ -18,21 +17,21 @@ __all__ = [
 
 from asyncio import sleep, to_thread
 from collections.abc import (
-    Awaitable,
     AsyncIterable,
     AsyncIterator,
+    Awaitable,
     Callable,
     Coroutine,
     Generator,
     Iterable,
 )
 from contextlib import (
-    asynccontextmanager,
     AbstractAsyncContextManager,
     AbstractContextManager,
+    asynccontextmanager,
 )
 from inspect import isawaitable, iscoroutine, iscoroutinefunction
-from typing import cast, Any, AsyncContextManager
+from typing import Any, AsyncContextManager, cast
 
 from fundrives.pan115._vendor.decotools import decorated
 

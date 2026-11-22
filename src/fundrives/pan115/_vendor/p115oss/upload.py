@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = ["upload_file_init", "upload_file", "MultipartUploadAbort"]
 
@@ -7,29 +6,30 @@ from asyncio import to_thread
 from collections.abc import Buffer, Callable, Coroutine, Mapping
 from hashlib import sha1
 from inspect import isawaitable
-from os import fsdecode, fstat, stat, PathLike
-from typing import cast, overload, Any, Literal
+from os import PathLike, fsdecode, fstat, stat
+from typing import Any, Literal, cast, overload
 from urllib.parse import urlsplit
 from uuid import uuid4
+
+from yarl import URL
 
 from fundrives.pan115._vendor.asynctools import ensure_async
 from fundrives.pan115._vendor.filewrap import SupportsRead, buffer_length
 from fundrives.pan115._vendor.hashtools import file_digest, file_digest_async
 from fundrives.pan115._vendor.http_request import SupportsGeturl
-from fundrives.pan115._vendor.http_response import get_total_length, get_filename
+from fundrives.pan115._vendor.http_response import get_filename, get_total_length
 from fundrives.pan115._vendor.iterutils import foreach, run_gen_step
 from fundrives.pan115._vendor.p115pickcode import pickcode_to_id, to_id
-from yarl import URL
 
 from .api import upload_init, upload_init_open, upload_resume
 from .oss import (
     DEFAULT_BUCKET,
     DEFAULT_ENDPOINT,
     oss_multipart_part_iter,
-    oss_upload,
-    oss_multipart_upload_init,
     oss_multipart_upload,
     oss_multipart_upload_complete,
+    oss_multipart_upload_init,
+    oss_upload,
 )
 
 
@@ -157,7 +157,7 @@ def upload_file_init(
             upload_data["user_key"] = user_key
         read_range: Callable
         try:
-            file = getattr(file, "getbuffer")()
+            file = file.getbuffer()
         except (AttributeError, TypeError):
             pass
         if isinstance(file, Buffer):
@@ -187,7 +187,7 @@ def upload_file_init(
                     filesha1 = filesha1_obj.hexdigest()
             if filesize < 0:
                 try:
-                    fileno = getattr(file, "fileno")()
+                    fileno = file.fileno()
                     filesize = fstat(fileno).st_size
                 except (AttributeError, TypeError, OSError):
                     for attr in ("length", "getlength", "__len__"):
@@ -200,7 +200,7 @@ def upload_file_init(
                             filesize = length
                             break
                     else:
-                        seek = getattr(file, "seek")
+                        seek = file.seek
                         if async_:
                             filesize = yield ensure_async(seek, threaded=True)(0, 2)
                         else:
@@ -577,7 +577,7 @@ def upload_file(
                         partsize = max(partsize, 1024 * 100)
                 else:
                     if isinstance(file, SupportsRead):
-                        seek = getattr(file, "seek")
+                        seek = file.seek
                         if async_:
                             yield ensure_async(seek, threaded=True)(0)
                         else:
@@ -627,7 +627,7 @@ def upload_file(
                     )
                 if isinstance(file, SupportsRead):
                     if skip_size:
-                        seek = getattr(file, "seek")
+                        seek = file.seek
                         if async_:
                             yield ensure_async(seek, threaded=True)(skip_size)
                         else:

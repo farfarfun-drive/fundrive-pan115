@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "iter_page_threaded",
@@ -11,12 +10,20 @@ __all__ = [
 ]
 
 from asyncio import (
-    sleep as async_sleep,
     CancelledError as AsyncCancelledError,
+)
+from asyncio import (
     Lock as AsyncLock,
+)
+from asyncio import (
     Queue as AsyncQueue,
+)
+from asyncio import (
     Task,
     TaskGroup,
+)
+from asyncio import (
+    sleep as async_sleep,
 )
 from collections import deque
 from collections.abc import AsyncIterator, Awaitable, Callable, Iterable, Iterator
@@ -27,7 +34,7 @@ from os import cpu_count
 from queue import Queue
 from threading import Lock
 from time import sleep, time
-from typing import cast, overload, Literal
+from typing import Literal, cast, overload
 
 from fundrives.pan115._vendor.argtools import argcount
 

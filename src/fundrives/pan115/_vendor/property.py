@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 3)
@@ -31,8 +30,7 @@ class funcproperty:
             return self
         if self.__is_method__:
             return self.__func__()
-        else:
-            return self.__func__(instance)
+        return self.__func__(instance)
 
     __class_getitem__: classmethod = classmethod(GenericAlias)
 

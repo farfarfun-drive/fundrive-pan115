@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __all__ = ["Ed2kHash", "ed2k_hash", "ed2k_hash_async"]
@@ -8,16 +7,16 @@ __version__ = (0, 0, 2)
 from collections.abc import AsyncIterator, Awaitable, Iterator, Sized
 from typing import Final
 
+from Crypto.Hash.MD4 import MD4Hash
+
 from fundrives.pan115._vendor.filewrap import (
     Buffer,
     SupportsRead,
-    bio_chunk_iter,
     bio_chunk_async_iter,
-    bytes_to_chunk_iter,
+    bio_chunk_iter,
     bytes_to_chunk_async_iter,
+    bytes_to_chunk_iter,
 )
-from Crypto.Hash.MD4 import MD4Hash
-
 
 MD4_BLOCK_SIZE: Final = 1024 * 9500
 MD4_EMPTY_HASH: Final = b"1\xd6\xcf\xe0\xd1j\xe91\xb7<Y\xd7\xe0\xc0\x89\xc0"
@@ -26,8 +25,7 @@ MD4_EMPTY_HASH: Final = b"1\xd6\xcf\xe0\xd1j\xe91\xb7<Y\xd7\xe0\xc0\x89\xc0"
 def buffer_length(b: Buffer, /) -> int:
     if isinstance(b, Sized):
         return len(b)
-    else:
-        return len(memoryview(b))
+    return len(memoryview(b))
 
 
 def ensure_bytes(b: Buffer, /) -> bytes | bytearray | memoryview:

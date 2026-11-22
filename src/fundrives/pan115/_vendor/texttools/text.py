@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __all__ = [
@@ -13,11 +12,12 @@ __all__ = [
     "dict_to_text",
 ]
 
-from collections.abc import Iterable, Iterator, Mapping
 from codecs import decode, encode
+from collections.abc import Iterable, Iterator, Mapping
 from itertools import chain, repeat
-from re import compile as re_compile, escape as re_escape, Pattern
-
+from re import Pattern
+from re import compile as re_compile
+from re import escape as re_escape
 
 CRE_UNICODE_ESCAPE_sub = re_compile(
     r"(?:\\(?:[\\nrt]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}))+"
@@ -27,17 +27,15 @@ CRE_UNICODE_ESCAPE_sub = re_compile(
 def unicode_escape(s: str, /, ensure_ascii: bool = True) -> str:
     if ensure_ascii:
         return str(encode(s, "unicode_escape"), "ascii")
-    else:
-        return repr(s)[1:-1]
+    return repr(s)[1:-1]
 
 
 def unicode_unescape(s: str, /, use_eval: bool = False) -> str:
     if s.isascii():
         return decode(s, "unicode_escape")
-    elif use_eval:
+    if use_eval:
         return eval(f"'{s.replace("'", "\\'")}'")
-    else:
-        return CRE_UNICODE_ESCAPE_sub(lambda m: decode(m[0], "unicode_escape"), s)
+    return CRE_UNICODE_ESCAPE_sub(lambda m: decode(m[0], "unicode_escape"), s)
 
 
 def replace[AnyStr: (bytes, str)](
@@ -86,8 +84,7 @@ def replace_index[AnyStr: (bytes, str)](
             index += 1
             if index >= start:
                 return new
-            else:
-                return m[0]
+            return m[0]
     else:
         stop = start + count
 
@@ -96,8 +93,7 @@ def replace_index[AnyStr: (bytes, str)](
             index += 1
             if start <= index < stop:
                 return new
-            else:
-                return m[0]
+            return m[0]
 
     if isinstance(olds, Pattern):
         pat = olds
@@ -136,7 +132,7 @@ def text_within[AnyStr: (bytes, str)](
         start = match.start() if with_prefix else match.end()
     if not suffix:
         return text[start:]
-    elif isinstance(suffix, (bytes, bytearray, str)):
+    if isinstance(suffix, (bytes, bytearray, str)):
         if greedy:
             stop = text.rfind(suffix, start0)
         else:

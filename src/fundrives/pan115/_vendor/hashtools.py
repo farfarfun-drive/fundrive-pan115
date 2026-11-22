@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 6)
@@ -20,25 +19,24 @@ from hashlib import new as hash_new
 from inspect import isasyncgenfunction, isawaitable
 from itertools import pairwise
 from os import fstat
-from typing import overload, runtime_checkable, Any, Literal, Protocol, TypeVar
+from typing import Any, Literal, Protocol, TypeVar, overload, runtime_checkable
 
-from fundrives.pan115._vendor.asynctools import ensure_async, ensure_aiter
+from fundrives.pan115._vendor.asynctools import ensure_aiter, ensure_async
 from fundrives.pan115._vendor.filewrap import (
     Buffer,
     SupportsRead,
     SupportsReadinto,
-    bio_skip_iter,
-    bio_skip_async_iter,
-    bio_chunk_iter,
     bio_chunk_async_iter,
-    bytes_iter,
+    bio_chunk_iter,
+    bio_skip_async_iter,
+    bio_skip_iter,
     bytes_async_iter,
-    bytes_iter_skip,
     bytes_async_iter_skip,
-    bytes_to_chunk_iter,
+    bytes_iter,
+    bytes_iter_skip,
     bytes_to_chunk_async_iter,
+    bytes_to_chunk_iter,
 )
-
 
 T = TypeVar("T")
 
@@ -298,7 +296,7 @@ def file_mdigest(
             nonlocal length
             if length < 0:
                 try:
-                    fileno = getattr(file, "fileno")()
+                    fileno = file.fileno()
                     length = fstat(fileno).st_size
                 except (AttributeError, OSError):
                     try:
@@ -330,7 +328,7 @@ def file_mdigest(
             raise ValueError(
                 "negative indices should not be used when using `Iterable[Buffer]`"
             )
-        elif stop and start >= stop:
+        if stop and start >= stop:
             return 0, results
         b_it = file
         if start:
@@ -460,7 +458,7 @@ async def file_mdigest_async(
             nonlocal length
             if length < 0:
                 try:
-                    fileno = getattr(file, "fileno")()
+                    fileno = file.fileno()
                     length = fstat(fileno).st_size
                 except (AttributeError, OSError):
                     try:
@@ -492,7 +490,7 @@ async def file_mdigest_async(
             raise ValueError(
                 "negative indices should not be used when using `Iterable[Buffer]`"
             )
-        elif stop and start >= stop:
+        if stop and start >= stop:
             return 0, results
         b_it = ensure_aiter(file)
         if start:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 1)
@@ -7,14 +6,14 @@ __all__ = ["IdToDirnode", "AncestorDict"]
 
 from collections import defaultdict
 from collections.abc import (
+    ItemsView,
     Iterable,
     Iterator,
+    KeysView,
     Mapping,
     MutableMapping,
     Sequence,
-    KeysView,
     ValuesView,
-    ItemsView,
 )
 from reprlib import recursive_repr
 from typing import TypedDict

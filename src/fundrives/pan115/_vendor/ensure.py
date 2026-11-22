@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io/>"
 __version__ = (0, 0, 2)
@@ -32,10 +31,10 @@ from collections.abc import (
     Iterator,
 )
 from contextlib import (
-    asynccontextmanager,
-    contextmanager,
     AbstractAsyncContextManager,
     AbstractContextManager,
+    asynccontextmanager,
+    contextmanager,
 )
 from enum import Enum
 from functools import update_wrapper
@@ -141,7 +140,7 @@ def ensure_acm[T](
 def ensure_enum[T: Enum](cls: type[T], val, /) -> T:
     if isinstance(val, cls):
         return val
-    elif isinstance(val, str):
+    if isinstance(val, str):
         try:
             return cls[val]
         except KeyError:
@@ -152,7 +151,7 @@ def ensure_enum[T: Enum](cls: type[T], val, /) -> T:
 def ensure_str(o, /, encoding: str = "utf-8", errors: str = "strict") -> str:
     if isinstance(o, str):
         return o
-    elif isinstance(o, Buffer):
+    if isinstance(o, Buffer):
         return str(o, encoding, errors)
     return str(o)
 
@@ -160,13 +159,13 @@ def ensure_str(o, /, encoding: str = "utf-8", errors: str = "strict") -> str:
 def ensure_bytes(o, /, encoding: str = "utf-8", errors: str = "strict") -> bytes:
     if isinstance(o, bytes):
         return o
-    elif isinstance(o, memoryview):
+    if isinstance(o, memoryview):
         return o.tobytes()
-    elif isinstance(o, Buffer):
+    if isinstance(o, Buffer):
         return bytes(o)
-    elif isinstance(o, int):
+    if isinstance(o, int):
         return int_to_bytes(o)
-    elif isinstance(o, (str, UserString)):
+    if isinstance(o, (str, UserString)):
         return o.encode(encoding, errors)
     try:
         return bytes(o)
@@ -177,9 +176,9 @@ def ensure_bytes(o, /, encoding: str = "utf-8", errors: str = "strict") -> bytes
 def ensure_buffer(o, /, encoding: str = "utf-8", errors: str = "strict") -> Buffer:
     if isinstance(o, Buffer):
         return o
-    elif isinstance(o, int):
+    if isinstance(o, int):
         return int_to_bytes(o)
-    elif isinstance(o, (str, UserString)):
+    if isinstance(o, (str, UserString)):
         return o.encode(encoding, errors)
     try:
         return bytes(o)
@@ -190,7 +189,6 @@ def ensure_buffer(o, /, encoding: str = "utf-8", errors: str = "strict") -> Buff
 def ensure_functype(f, /):
     if isinstance(f, FunctionType):
         return f
-    elif callable(f):
+    if callable(f):
         return update_wrapper(lambda *args, **kwds: f(*args, **kwds), f)
-    else:
-        return lambda: f
+    return lambda: f

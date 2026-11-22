@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "async_all",
@@ -15,25 +14,25 @@ __all__ = [
 ]
 
 from collections.abc import (
+    AsyncIterable,
     Awaitable,
     Callable,
-    Coroutine,
-    Iterable,
-    AsyncIterable,
     Collection,
+    Coroutine,
     ItemsView,
+    Iterable,
     Mapping,
     MutableMapping,
     MutableSequence,
     MutableSet,
 )
 from operator import add
-from typing import cast, overload, Any
+from typing import Any, cast, overload
 
-from fundrives.pan115._vendor.undefined import undefined, Undefined
+from fundrives.pan115._vendor.undefined import Undefined, undefined
 
 from .basic import ensure_aiter, ensure_async
-from .type import SupportsBool, SupportsAdd, SupportsRAdd
+from .type import SupportsAdd, SupportsBool, SupportsRAdd
 
 
 async def async_all[T](
@@ -201,13 +200,13 @@ async def async_collect(
             ls = rettype()
             await async_foreach(ls.append, iterator)
             return ls
-        elif issubclass(rettype, MutableSet):
+        if issubclass(rettype, MutableSet):
             if rettype is set:
                 return {e async for e in iterator}
             st = rettype()
             await async_foreach(st.add, iterator)
             return st
-        elif issubclass(rettype, MutableMapping):
+        if issubclass(rettype, MutableMapping):
             if rettype is dict:
                 return {k: v async for k, v in iterator}
             dt = rettype()

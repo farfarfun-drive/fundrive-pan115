@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "async_range",
@@ -30,30 +29,30 @@ __all__ = [
     "async_combinations_with_replacement",
 ]
 
-from asyncio import create_task, wait, Task
+from asyncio import Task, create_task, wait
 from collections.abc import (
+    AsyncIterable,
+    AsyncIterator,
     Awaitable,
     Callable,
     Iterable,
-    AsyncIterable,
-    AsyncIterator,
     MutableSequence,
     Sequence,
 )
 from itertools import (
     batched,
-    count,
-    cycle,
-    repeat,
-    pairwise,
-    product,
-    permutations,
     combinations,
     combinations_with_replacement,
+    count,
+    cycle,
+    pairwise,
+    permutations,
+    product,
+    repeat,
 )
-from typing import cast, overload, Any, Self
+from typing import Any, Self, cast, overload
 
-from fundrives.pan115._vendor.undefined import undefined, Undefined
+from fundrives.pan115._vendor.undefined import Undefined, undefined
 
 from .basic import ensure_aiter, ensure_async, ensure_coroutine, to_aiter
 from .reduce import async_collect
@@ -79,8 +78,7 @@ def async_enumerate[T](
 ) -> AsyncIterator[tuple[int, T]]:
     if threaded or isinstance(iterable, AsyncIterable):
         return async_zip(async_count(start), ensure_aiter(iterable, threaded=threaded))
-    else:
-        return to_aiter(enumerate(iterable, start))
+    return to_aiter(enumerate(iterable, start))
 
 
 async def _async_zip(
@@ -188,22 +186,20 @@ def async_batched[T](
     if isinstance(iterable, Sequence):
         if n == 1:
             return to_aiter(zip(iterable))
-        else:
-            return to_aiter(
-                map(
-                    lambda t, /: tuple(iterable[slice(*t)]),
-                    pairwise(range(0, len(iterable) + n, n)),
-                )
+        return to_aiter(
+            map(
+                lambda t, /: tuple(iterable[slice(*t)]),
+                pairwise(range(0, len(iterable) + n, n)),
             )
-    elif threaded or isinstance(iterable, AsyncIterable):
+        )
+    if threaded or isinstance(iterable, AsyncIterable):
         from .misc import async_iter
 
         async def get(it=ensure_aiter(iterable, threaded=threaded), /):
             return tuple([a async for a in async_islice(it, n)])
 
         return async_iter(get, ())
-    else:
-        return to_aiter(batched(iterable, n))
+    return to_aiter(batched(iterable, n))
 
 
 async def async_chain[T](
@@ -230,7 +226,7 @@ async def async_chain_from_iterable[T](
                 yield e
 
 
-setattr(async_chain, "from_iterable", async_chain_from_iterable)
+async_chain.from_iterable = async_chain_from_iterable
 
 
 def async_compress[T](
@@ -283,8 +279,7 @@ def async_cycle[T](
 ) -> AsyncIterator[T]:
     if threaded or isinstance(iterable, AsyncIterable):
         return _async_cycle(iterable, threaded=threaded)
-    else:
-        return to_aiter(cycle(iterable))
+    return to_aiter(cycle(iterable))
 
 
 async def async_dropwhile[T](

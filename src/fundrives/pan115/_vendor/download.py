@@ -26,36 +26,35 @@ __all__ = [
 # NOTE https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Encoding
 
 import errno
-
+from abc import ABC, abstractmethod
 from asyncio import create_task, to_thread
 from asyncio.exceptions import CancelledError, InvalidStateError
-from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator, AsyncIterator, Callable, Generator, Iterator
 from enum import IntEnum
 from inspect import isawaitable
-from os import fsdecode, fstat, makedirs, PathLike
-from os.path import abspath, dirname, isdir, join as joinpath
+from os import PathLike, fsdecode, fstat, makedirs
+from os.path import abspath, dirname, isdir
+from os.path import join as joinpath
 from shutil import COPY_BUFSIZE  # type: ignore
 from threading import Event, Lock
-from typing import cast, Any, NamedTuple, Self
+from typing import Any, NamedTuple, Self, cast
 
 from fundrives.pan115._vendor.asynctools import ensure_aiter, ensure_async
 from fundrives.pan115._vendor.concurrenttools import run_as_thread
 from fundrives.pan115._vendor.filewrap import (
-    bio_chunk_iter,
-    bio_chunk_async_iter,
-    bio_skip_iter,
-    bio_skip_async_iter,
     SupportsWrite,
+    bio_chunk_async_iter,
+    bio_chunk_iter,
+    bio_skip_async_iter,
+    bio_skip_iter,
 )
+from fundrives.pan115._vendor.http_request.extension.request import urlopen
 from fundrives.pan115._vendor.http_response import (
     get_filename,
     get_length,
     is_chunked,
     is_range_request,
 )
-from fundrives.pan115._vendor.http_request.extension.request import urlopen
-
 
 DEFAULT_ITER_BYTES = lambda resp: bio_chunk_iter(resp, chunksize=COPY_BUFSIZE)
 DEFAULT_ASYNC_ITER_BYTES = lambda resp: bio_chunk_async_iter(
@@ -178,8 +177,7 @@ class BaseDownloadTask(ABC):
     def exception(self, /) -> None | BaseException:
         if self.done:
             return self._exception
-        else:
-            raise InvalidStateError(self.state)
+        raise InvalidStateError(self.state)
 
     def set_exception(self, exception, /):
         self._exception = exception
@@ -187,10 +185,9 @@ class BaseDownloadTask(ABC):
     def result(self, /):
         if self.finished:
             return self._result
-        elif not self.done:
+        if not self.done:
             raise InvalidStateError(self.state)
-        else:
-            raise cast(BaseException, self._exception)
+        raise cast(BaseException, self._exception)
 
     def set_result(self, result, /):
         self._result = result
@@ -252,7 +249,7 @@ class DownloadTask(BaseDownloadTask):
         with self._state_lock:
             if not self.done:
                 self.done_callbacks.append(callback)
-                return
+                return None
         return callback(self)
 
     def cancel(self, /):
@@ -301,7 +298,7 @@ class DownloadTask(BaseDownloadTask):
         else:
             if self.done:
                 try:
-                    getattr(it, "__del__")()
+                    it.__del__()
                 except:
                     pass
                 for callback in self.done_callbacks:
@@ -362,7 +359,7 @@ class AsyncDownloadTask(BaseDownloadTask):
                     if isinstance(it, AsyncGenerator):
                         await it.aclose()
                     else:
-                        getattr(it, "__del__")()
+                        it.__del__()
                 except:
                     pass
             elif self.done:
@@ -436,7 +433,7 @@ def download_iter(
         filesize = 0
         if resume:
             try:
-                fileno = getattr(fdst, "fileno")()
+                fileno = fdst.fileno()
                 filesize = fstat(fileno).st_size
             except (AttributeError, OSError):
                 pass
@@ -589,13 +586,13 @@ async def download_async_iter(
             except FileNotFoundError:
                 makedirs(dirname(file), exist_ok=True)
                 fdst = open(file, "ab" if resume else "wb")
-            file_async_close = ensure_async(getattr(fdst, "close"))
+            file_async_close = ensure_async(fdst.close)
 
         extra = {"url": url, "file": file, "resume": resume}
         filesize = 0
         if resume:
             try:
-                fileno = getattr(fdst, "fileno")()
+                fileno = fdst.fileno()
                 filesize = fstat(fileno).st_size
             except (AttributeError, OSError):
                 pass

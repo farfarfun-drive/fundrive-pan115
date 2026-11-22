@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = ["P115QueryDB"]
 __doc__ = "这个模块提供了一个和查询数据库有关的类"
 
 from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
-from typing import cast, overload, Any
+from typing import Any, cast, overload
 
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.iter_collect import grouped_mapping
 from fundrives.pan115._vendor.iterutils import bfs_gen
-from fundrives.pan115._vendor.posixpatht import path_is_dir_form, escape, splits
+from fundrives.pan115._vendor.posixpatht import escape, path_is_dir_form, splits
 from fundrives.pan115._vendor.sqlitetools import connect, find, query
 
 from ..util import posix_escape_name
@@ -103,7 +102,7 @@ SELECT id, parent_id, name FROM t;""",
             con = self
         return find(
             con,
-            f"SELECT * FROM data WHERE id=? LIMIT 1",
+            "SELECT * FROM data WHERE id=? LIMIT 1",
             id,
             FileNotFoundError(errno.ENOENT, id),
             row_factory="dict",
@@ -173,14 +172,14 @@ SELECT SUM(is_dir) AS dir_count, SUM(NOT is_dir) AS file_count FROM ids HAVING d
                 pickcode,
                 default=FileNotFoundError(pickcode),
             )
-        elif sha1:
+        if sha1:
             return find(
                 con,
                 f"SELECT id FROM data WHERE sha1=?{insertion} LIMIT 1",
                 sha1,
                 default=FileNotFoundError(sha1),
             )
-        elif path:
+        if path:
             return P115QueryDB.path_to_id(
                 con,
                 path,
@@ -285,20 +284,17 @@ SELECT SUM(is_dir) AS dir_count, SUM(NOT is_dir) AS file_count FROM ids HAVING d
                 id,
                 default=FileNotFoundError(id),
             )
-        elif sha1:
+        if sha1:
             return find(
                 con,
                 f"SELECT pickcode FROM data WHERE sha1=?{insertion} LIMIT 1;",
                 sha1,
                 default=FileNotFoundError(sha1),
             )
-        else:
-            if path in ("", "/"):
-                return ""
-            id = P115QueryDB.path_to_id(
-                con, path, parent_id=parent_id, is_alive=is_alive
-            )
-            return P115QueryDB.get_pickcode(con, id)
+        if path in ("", "/"):
+            return ""
+        id = P115QueryDB.path_to_id(con, path, parent_id=parent_id, is_alive=is_alive)
+        return P115QueryDB.get_pickcode(con, id)
 
     def get_sha1(
         self,
@@ -334,20 +330,17 @@ SELECT SUM(is_dir) AS dir_count, SUM(NOT is_dir) AS file_count FROM ids HAVING d
                 id,
                 default=FileNotFoundError(id),
             )
-        elif pickcode:
+        if pickcode:
             return find(
                 con,
                 f"SELECT sha1 FROM data WHERE pickcode=?{insertion} LIMIT 1;",
                 pickcode,
                 default=FileNotFoundError(pickcode),
             )
-        else:
-            if path in ("", "/"):
-                return ""
-            id = P115QueryDB.path_to_id(
-                con, path, parent_id=parent_id, is_alive=is_alive
-            )
-            return P115QueryDB.get_sha1(con, id)
+        if path in ("", "/"):
+            return ""
+        id = P115QueryDB.path_to_id(con, path, parent_id=parent_id, is_alive=is_alive)
+        return P115QueryDB.get_sha1(con, id)
 
     def has_id(
         self,
@@ -365,7 +358,7 @@ SELECT SUM(is_dir) AS dir_count, SUM(NOT is_dir) AS file_count FROM ids HAVING d
         """
         if id == 0:
             return 1
-        elif id < 0:
+        if id < 0:
             return 0
         con: Any
         if isinstance(self, P115QueryDB):
@@ -1056,7 +1049,7 @@ WITH t AS (
             con = self.con
         else:
             con = self
-        sql = f"""\
+        sql = """\
 WITH stats AS (
     SELECT
         COUNT(1) OVER w AS total, 
@@ -1241,7 +1234,7 @@ WITH pairs AS (
                     if k in ok_ids:
                         update_ok(temp)
                         break
-                    elif k in na_ids:
+                    if k in na_ids:
                         update_na(temp)
                         break
                     push(k)

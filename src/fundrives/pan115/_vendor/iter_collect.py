@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 6)
@@ -26,7 +25,7 @@ from collections.abc import (
     MutableMapping,
 )
 from operator import itemgetter
-from typing import cast, overload, runtime_checkable, Any, Callable, Protocol
+from typing import Any, Callable, Protocol, cast, overload, runtime_checkable
 
 
 @runtime_checkable

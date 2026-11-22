@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __all__ = ["HTTPError", "request"]
@@ -15,37 +14,37 @@ from collections.abc import (
     Iterator,
     Mapping,
 )
-from http.client import HTTPConnection, HTTPSConnection, HTTPResponse
+from http.client import HTTPConnection, HTTPResponse, HTTPSConnection
 from http.cookiejar import CookieJar
 from http.cookies import BaseCookie
 from inspect import isawaitable, isgeneratorfunction
 from os import PathLike
 from sys import exc_info
 from types import EllipsisType
-from typing import cast, overload, Any, Literal
+from typing import Any, Literal, cast, overload
 from urllib.parse import urljoin, urlsplit, urlunsplit
 from warnings import warn
 
-from fundrives.pan115._vendor.cookietools import update_cookies, cookies_to_str
-from fundrives.pan115._vendor.ensure import ensure_bytes, ensure_str
-from fundrives.pan115._vendor.dicttools import iter_items
-from fundrives.pan115._vendor.filewrap import (
-    bio_chunk_iter,
-    bio_chunk_async_iter,
-    SupportsRead,
-)
-from fundrives.pan115._vendor.http_response import (
-    get_status_code,
-    headers_get,
-    decompress_response,
-    parse_response,
-    get_length,
-)
-from fundrives.pan115._vendor.socket_keepalive import socket_keepalive
 from yarl import URL
 
-from .. import normalize_request_args, SupportsGeturl
+from fundrives.pan115._vendor.cookietools import cookies_to_str, update_cookies
+from fundrives.pan115._vendor.dicttools import iter_items
+from fundrives.pan115._vendor.ensure import ensure_bytes, ensure_str
+from fundrives.pan115._vendor.filewrap import (
+    SupportsRead,
+    bio_chunk_async_iter,
+    bio_chunk_iter,
+)
+from fundrives.pan115._vendor.http_response import (
+    decompress_response,
+    get_length,
+    get_status_code,
+    headers_get,
+    parse_response,
+)
+from fundrives.pan115._vendor.socket_keepalive import socket_keepalive
 
+from .. import SupportsGeturl, normalize_request_args
 
 type string = Buffer | str | UserString
 
@@ -58,9 +57,9 @@ def get_headers(response, /):
         if callable(headers):
             headers = headers()
         return headers
-    elif hasattr(response, "getheaders"):
+    if hasattr(response, "getheaders"):
         return response.getheaders()
-    elif hasattr(response, "info"):
+    if hasattr(response, "info"):
         return response.info()
     raise TypeError("can't read response headers")
 
@@ -91,11 +90,11 @@ def call_close(response, /):
     try:
         if hasattr(response, "close"):
             return response.close()
-        elif hasattr(response, "release"):
+        if hasattr(response, "release"):
             return response.release()
-        elif hasattr(response, "__exit__"):
+        if hasattr(response, "__exit__"):
             return response.__exit__(**exc_info())
-        elif hasattr(response, "__del__"):
+        if hasattr(response, "__del__"):
             return response.__del__()
     except Exception:
         pass
@@ -104,7 +103,7 @@ def call_close(response, /):
 async def call_async_read(response, /):
     if hasattr(response, "aread"):
         return await response.aread()
-    elif hasattr(response, "read"):
+    if hasattr(response, "read"):
         ret = response.read()
         if isawaitable(ret):
             ret = await ret
@@ -153,23 +152,23 @@ async def call_async_close(response, /):
     try:
         if hasattr(response, "aclose"):
             return await response.aclose()
-        elif hasattr(response, "close"):
+        if hasattr(response, "close"):
             ret = response.close()
             if isawaitable(ret):
                 ret = await ret
             return ret
-        elif hasattr(response, "async_release"):
+        if hasattr(response, "async_release"):
             return await response.async_release()
-        elif hasattr(response, "release"):
+        if hasattr(response, "release"):
             ret = response.release()
             if isawaitable(ret):
                 ret = await ret
             return ret
-        elif hasattr(response, "__aexit__"):
+        if hasattr(response, "__aexit__"):
             return await response.__aexit__(**exc_info())
-        elif hasattr(response, "__exit__"):
+        if hasattr(response, "__exit__"):
             return response.__exit__(**exc_info())
-        elif hasattr(response, "__del__"):
+        if hasattr(response, "__del__"):
             return response.__del__()
     except Exception:
         pass
@@ -221,8 +220,8 @@ def urlopen(
     )
     socket_keepalive(con.sock)
     resp = con.getresponse()
-    setattr(resp, "method", method.upper())
-    setattr(resp, "url", url)
+    resp.method = method.upper()
+    resp.url = url
     return resp
 
 
@@ -384,7 +383,7 @@ def request_sync[Response, T](
             if cookies is not None and response_cookies:
                 update_cookies(cookies, response_cookies)  # type: ignore
         else:
-            setattr(response, "cookies", response_cookies)
+            response.cookies = response_cookies
             set_cookies: list[str] = []
             if response_headers := get_headers(response):
                 set_cookies.extend(
@@ -439,7 +438,7 @@ def request_sync[Response, T](
             if request_kwargs["method"] == "HEAD":
                 finalize(response)
             return response
-        elif parse is ...:
+        if parse is ...:
             finalize(response, 10485760, method=request_kwargs["method"])
             return response
         try:
@@ -580,7 +579,7 @@ async def request_async[Response, T](
             if cookies is not None and response_cookies:
                 update_cookies(cookies, response_cookies)  # type: ignore
         else:
-            setattr(response, "cookies", response_cookies)
+            response.cookies = response_cookies
             set_cookies: list[str] = []
             if response_headers := get_headers(response):
                 set_cookies.extend(
@@ -639,7 +638,7 @@ async def request_async[Response, T](
             if request_kwargs["method"] == "HEAD":
                 await async_finalize(response)
             return response
-        elif parse is ...:
+        if parse is ...:
             await async_finalize(response, 10485760, method=request_kwargs["method"])
             return response
         try:
@@ -756,19 +755,18 @@ def request[Response, T](
             parse=parse,  # type: ignore
             **request_kwargs,
         )
-    else:
-        return request_sync(
-            url=url,
-            method=method,
-            params=params,
-            data=data,
-            json=json,
-            files=files,
-            headers=headers,
-            follow_redirects=follow_redirects,
-            raise_for_status=raise_for_status,
-            cookies=cookies,
-            dont_decompress=dont_decompress,
-            parse=parse,  # type: ignore
-            **request_kwargs,
-        )
+    return request_sync(
+        url=url,
+        method=method,
+        params=params,
+        data=data,
+        json=json,
+        files=files,
+        headers=headers,
+        follow_redirects=follow_redirects,
+        raise_for_status=raise_for_status,
+        cookies=cookies,
+        dont_decompress=dont_decompress,
+        parse=parse,  # type: ignore
+        **request_kwargs,
+    )

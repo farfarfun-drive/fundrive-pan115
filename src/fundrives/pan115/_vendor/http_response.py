@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 9)
@@ -22,16 +21,17 @@ __all__ = [
 
 from codecs import lookup
 from collections.abc import Container, Iterable, Mapping
+from http.client import HTTPMessage
 from mimetypes import guess_extension, guess_type
 from posixpath import basename
-from re import compile as re_compile, IGNORECASE
-from typing import cast, Final
-from urllib.parse import parse_qsl, urlsplit, unquote
-from http.client import HTTPMessage
+from re import IGNORECASE
+from re import compile as re_compile
+from typing import Final, cast
+from urllib.parse import parse_qsl, unquote, urlsplit
 
-from fundrives.pan115._vendor.dicttools import get
 from orjson import loads
 
+from fundrives.pan115._vendor.dicttools import get
 
 CRE_CONTENT_RANGE_fullmatch: Final = re_compile(
     r"bytes\s+(?:\*|(?P<begin>[0-9]+)-(?P<end>[0-9]+))/(?:(?P<size>[0-9]+)|\*)"
@@ -106,13 +106,13 @@ def headers_get(response, /, key: bytes | str, default=None, parse=None):
             return default
     if parse is None:
         return val
-    elif callable(parse):
+    if callable(parse):
         return parse(val)
-    elif isinstance(parse, (bytes, str)):
+    if isinstance(parse, (bytes, str)):
         return val == parse
-    elif isinstance(parse, Mapping):
+    if isinstance(parse, Mapping):
         return headers_get(parse, val, default)
-    elif isinstance(parse, Container):
+    if isinstance(parse, Container):
         return val in parse
     return val
 
@@ -191,7 +191,7 @@ def get_range(response, /) -> None | tuple[int, int, int]:
             else:
                 size = end + 1
             return begin, end, size
-        elif size:
+        if size:
             size = int(size)
             if size == 0:
                 return 0, 0, 0
@@ -223,16 +223,15 @@ def parse_response(
     if mimetype == "application/json":
         if charset == "utf-8":
             return loads(content)
-        else:
-            return loads(content.decode(charset))
-    elif content_type.startswith("text/"):
+        return loads(content.decode(charset))
+    if content_type.startswith("text/"):
         return content.decode(charset)
     return content
 
 
 def decompress_deflate(data: bytes, compresslevel: int = 9) -> bytes:
     # Fork from: https://stackoverflow.com/questions/1089662/python-inflate-and-deflate-implementations#answer-1089787
-    from zlib import compressobj, DEF_MEM_LEVEL, DEFLATED, MAX_WBITS
+    from zlib import DEF_MEM_LEVEL, DEFLATED, MAX_WBITS, compressobj
 
     compress = compressobj(
         compresslevel,  # level: 0-9
@@ -263,7 +262,7 @@ def decompress_response(
         content_encoding = headers_get(content_encoding, "content-encoding")
     if not content_encoding:
         return data
-    elif not isinstance(content_encoding, str):
+    if not isinstance(content_encoding, str):
         content_encoding = str(content_encoding, "latin-1")
     match content_encoding:
         case "gzip":
@@ -277,7 +276,12 @@ def decompress_response(
 
             return decompress_br(data)
         case "zstd":
-            from zstandard import decompress as decompress_zstd
+            try:
+                from compression.zstd import (
+                    decompress as decompress_zstd,  # type: ignore
+                )
+            except ImportError:
+                from zstandard import decompress as decompress_zstd  # type: ignore
 
             return decompress_zstd(data)
     return data

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __all__ = ["cycle_text", "rotate_text"]
@@ -7,8 +6,19 @@ __all__ = ["cycle_text", "rotate_text"]
 from collections.abc import Iterable, Iterator
 from itertools import accumulate, count, cycle, repeat
 from time import perf_counter
+from unicodedata import east_asian_width
 
-from wcwidth import wcwidth, wcswidth  # type: ignore
+try:
+    from wcwidth import wcswidth, wcwidth  # type: ignore
+except ImportError:
+
+    def wcwidth(ch: str, /) -> int:
+        if not ch or ord(ch) < 32 or ord(ch) == 0x7F:
+            return 0
+        return 2 if east_asian_width(ch) in ("W", "F") else 1
+
+    def wcswidth(text: str, /) -> int:
+        return sum(wcwidth(ch) for ch in text)
 
 
 def cycle_text(
@@ -27,17 +37,16 @@ def cycle_text(
             text_it = (prefix + s for s in text_it)
     if interval <= 0:
         return cycle(text_it)
-    else:
 
-        def wrapper():
-            t = perf_counter()
-            for p in cycle(text_it):
+    def wrapper():
+        t = perf_counter()
+        for p in cycle(text_it):
+            yield p
+            while (s := perf_counter()) - t < interval:
                 yield p
-                while (s := perf_counter()) - t < interval:
-                    yield p
-                t = s
+            t = s
 
-        return wrapper()
+    return wrapper()
 
 
 def rotate_text(
@@ -100,9 +109,7 @@ def rotate_text(
                         right, j = wcm[n]
                     if n == size:
                         break
-                    if right - left == length:
-                        yield text[i:j]
-                    elif n - m == 1:
+                    if right - left == length or n - m == 1:
                         yield text[i:j]
                     else:
                         n -= 1

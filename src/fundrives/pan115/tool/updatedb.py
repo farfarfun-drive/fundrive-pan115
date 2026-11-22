@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "updatedb_initdb",
@@ -12,22 +11,23 @@ from collections.abc import AsyncIterator, Callable, Coroutine, Iterator
 from inspect import isawaitable
 from os import PathLike
 from time import time
-from typing import overload, Any, Literal
+from typing import Any, Literal, overload
+
+from orjson import dumps
 
 from fundrives.pan115._vendor.asynctools import ensure_async
 from fundrives.pan115._vendor.iterutils import (
+    Yield,
     chunked,
     foreach,
     run_gen_step,
     run_gen_step_iter,
     with_iter_next,
-    Yield,
 )
-from orjson import dumps
 from fundrives.pan115._vendor.sqlitetools import (
     connect,
-    executescript,
     execute,
+    executescript,
     find,
     query,
     upsert_items,
@@ -35,7 +35,7 @@ from fundrives.pan115._vendor.sqlitetools import (
 
 from ..client import P115Client
 from .history import iter_history_list
-from .iterdir import iterdir, iter_dirs, traverse_tree
+from .iterdir import iter_dirs, iterdir, traverse_tree
 from .life import iter_life_behavior_list
 from .querydb import P115QueryDB
 
@@ -48,8 +48,7 @@ def wrap_async(
 ):
     if async_:
         return ensure_async(func, threaded=threaded)
-    else:
-        return func
+    return func
 
 
 def locked_gen_step(lock, func, /, *args, **kwds):

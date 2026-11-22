@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "HISTORY_NAME_TO_TYPE",
@@ -14,13 +13,12 @@ from asyncio import sleep as async_sleep
 from collections.abc import AsyncIterator, Container, Iterator
 from functools import partial
 from os import PathLike
-from time import time, sleep
-from typing import overload, Final, Literal
+from time import sleep, time
+from typing import Final, Literal, overload
 
-from fundrives.pan115._vendor.iterutils import run_gen_step_iter, with_iter_next, Yield
+from fundrives.pan115._vendor.iterutils import Yield, run_gen_step_iter, with_iter_next
 
-from ..client import check_response, P115Client
-
+from ..client import P115Client, check_response
 
 #: 115 生活操作事件名称到类型的映射
 HISTORY_NAME_TO_TYPE: Final = {

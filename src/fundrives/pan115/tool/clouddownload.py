@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = ["clouddownload_iter", "clouddownload_restart_iter"]
 __doc__ = "这个模块提供了一些和云下载有关的函数"
@@ -9,17 +8,17 @@ from collections.abc import AsyncIterator, Callable, Iterable, Iterator
 from itertools import count
 from os import PathLike
 from time import sleep, time
-from typing import overload, Literal
+from typing import Literal, overload
 
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.iterutils import (
-    run_gen_step_iter,
-    with_iter_next,
     Yield,
     YieldFrom,
+    run_gen_step_iter,
+    with_iter_next,
 )
 
-from ..client import check_response, P115Client, P115OpenClient
+from ..client import P115Client, P115OpenClient, check_response
 from ..exception import throw
 
 

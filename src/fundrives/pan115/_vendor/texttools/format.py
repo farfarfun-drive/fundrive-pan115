@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __all__ = ["format_mode", "format_size", "format_time", "format_timestamp"]
 
 import stat
-
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from email.utils import format_datetime
 from stat import S_IFMT, S_IMODE
 from typing import Final, Literal
-
 
 FILE_TYPE: Final[dict[int, str]] = {
     stat.S_IFBLK: "b",
@@ -138,8 +135,6 @@ def format_timestamp(ts: int | float, /, format: str = "") -> str:
         case "iso":
             return datetime.fromtimestamp(ts).isoformat()
         case "gmt":
-            return format_datetime(
-                datetime.fromtimestamp(ts, timezone.utc), usegmt=True
-            )
+            return format_datetime(datetime.fromtimestamp(ts, UTC), usegmt=True)
         case _:
             return datetime.fromtimestamp(ts).strftime(format)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 5)
@@ -20,7 +19,6 @@ __license__ = "GPLv3 <https://www.gnu.org/licenses/gpl-3.0.txt>"
 
 from string import ascii_lowercase, digits
 from typing import Final, Literal
-
 
 #: 字符表，任何一个 pickcode 只包含这 36 个字符
 ALPHABET: Final = digits + ascii_lowercase
@@ -53,7 +51,7 @@ def b36encode(n: int, /) -> str:
     "数字转换为 36 进制字符串"
     if n < 0:
         return "-" + b36encode(-n)
-    elif n < 36:
+    if n < 36:
         return ALPHABET[n]
     chars: list[str] = []
     add_char = chars.append
@@ -81,7 +79,7 @@ def get_stable_point(pickcode: str, /) -> str:
     len_pickcode = len(pickcode)
     if len_pickcode < 4:
         return "0" * (4 - len_pickcode) + pickcode
-    elif len_pickcode >= 6 and pickcode[:2] in ("fa", "fb", "fc", "fd", "fe"):
+    if len_pickcode >= 6 and pickcode[:2] in ("fa", "fb", "fc", "fd", "fe"):
         prefix = pickcode[:2]
     elif len_pickcode >= 5 and pickcode[0] in ("a", "b", "c", "d", "e"):
         prefix = pickcode[0]
@@ -102,7 +100,7 @@ def is_valid_pickcode(pickcode: str, /) -> bool:
     """
     if not pickcode:
         return True
-    elif pickcode.strip(ALPHABET):
+    if pickcode.strip(ALPHABET):
         return False
     len_pickcode = len(pickcode)
     if pickcode.startswith("f") and len_pickcode < 7 or len_pickcode < 6:
@@ -175,7 +173,7 @@ def id_to_pickcode(
     """
     if not id:
         return ""
-    elif id < 0:
+    if id < 0:
         raise ValueError(f"negtive id is not allowed, got {id!r}")
     len_stable_point = len(stable_point)
     prefix_: str = prefix or "a"
@@ -224,10 +222,9 @@ def to_id(pickcode: int | str, /) -> int:
         return id
     if not pickcode:
         return 0
-    elif pickcode.startswith(("a", "b", "c", "d", "e", "f")):
+    if pickcode.startswith(("a", "b", "c", "d", "e", "f")):
         return pickcode_to_id(pickcode)
-    else:
-        return int(pickcode)
+    return int(pickcode)
 
 
 def to_pickcode(
@@ -249,7 +246,7 @@ def to_pickcode(
     """
     if not id:
         return ""
-    elif isinstance(id, str):
+    if isinstance(id, str):
         if id.startswith(("a", "b", "c", "d", "e", "f")):
             return id
         id = int(id)

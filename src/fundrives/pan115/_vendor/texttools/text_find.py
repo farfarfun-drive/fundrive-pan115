@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __all__ = [
@@ -11,9 +10,9 @@ __all__ = [
     "text_between",
 ]
 
-from itertools import islice
 from collections import deque
-from typing import cast, AnyStr, Iterator, NamedTuple, Optional
+from itertools import islice
+from typing import AnyStr, Iterator, NamedTuple, Optional, cast
 
 
 class Span(NamedTuple):
@@ -26,8 +25,8 @@ def text_find(
     pattern,
     /,
     index: int = 0,
-    start: Optional[int] = None,
-    stop: Optional[int] = None,
+    start: int | None = None,
+    stop: int | None = None,
 ) -> Span:
     """find substring.
 
@@ -112,8 +111,7 @@ def text_find(
     if start >= stop:
         if index >= 0:
             return Span(start, start)
-        else:
-            return Span(stop, stop)
+        return Span(stop, stop)
     if isinstance(pattern, (bytes, str)):
         pattern = cast(AnyStr, pattern)
         patn_len = len(pattern)
@@ -131,15 +129,14 @@ def text_find(
                     return Span(stop, stop)
                 start = i + patn_len
             return Span(start - patn_len, start)
-        else:
-            rfind = text.rfind
-            for _ in range(-index):
-                i = rfind(pattern, start, stop)
-                if i < 0:
-                    return Span(start, start)
-                stop = i
-            return Span(stop, stop + patn_len)
-    elif index >= 0:
+        rfind = text.rfind
+        for _ in range(-index):
+            i = rfind(pattern, start, stop)
+            if i < 0:
+                return Span(start, start)
+            stop = i
+        return Span(stop, stop + patn_len)
+    if index >= 0:
         try:
             match = next(islice(pattern.finditer(text, start, stop), index, None))
             return Span(*match.span())
@@ -149,16 +146,15 @@ def text_find(
         dq = deque(pattern.finditer(text, start, stop), maxlen=-index)
         if len(dq) == -index:
             return Span(*dq[0].span())
-        else:
-            return Span(start, start)
+        return Span(start, start)
 
 
 def text_finditer(
     text: AnyStr,
     pattern,
     /,
-    start: Optional[int] = None,
-    stop: Optional[int] = None,
+    start: int | None = None,
+    stop: int | None = None,
 ) -> Iterator[Span]:
     """find and iterate over substrings.
 
@@ -221,8 +217,8 @@ def text_before(
     prefix,
     /,
     index: int = 0,
-    start: Optional[int] = None,
-    stop: Optional[int] = None,
+    start: int | None = None,
+    stop: int | None = None,
     with_match: bool = False,
 ) -> AnyStr:
     """find substring with prefix.
@@ -288,8 +284,8 @@ def text_after(
     suffix,
     /,
     index: int = 0,
-    start: Optional[int] = None,
-    stop: Optional[int] = None,
+    start: int | None = None,
+    stop: int | None = None,
     with_match: bool = False,
 ) -> AnyStr:
     """find substring with suffix.
@@ -346,8 +342,8 @@ def text_between(
     suffix,
     /,
     index: int = 0,
-    start: Optional[int] = None,
-    stop: Optional[int] = None,
+    start: int | None = None,
+    stop: int | None = None,
     with_match: bool = False,
 ) -> AnyStr:
     """find substring with prefix and suffix.
@@ -458,8 +454,7 @@ def text_between(
             return text[:0]
     if with_match:
         return text[start0:stop0]
-    else:
-        return text[start1:stop1]
+    return text[start1:stop1]
 
 
 if __name__ == "__main__":

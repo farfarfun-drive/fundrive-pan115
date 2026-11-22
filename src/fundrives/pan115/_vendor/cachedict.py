@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -21,23 +20,23 @@ __all__ = [
     "FastLRUDict",
 ]
 
-from collections import deque, defaultdict, UserDict
+from collections import UserDict, defaultdict, deque
 from collections.abc import Callable, Hashable, Iterable, Iterator
 from copy import copy
 from dataclasses import dataclass, field
 from functools import update_wrapper
-from heapq import heappush, heappop, nlargest, nsmallest
-from inspect import signature, _empty
+from heapq import heappop, heappush, nlargest, nsmallest
+from inspect import _empty, signature
 from itertools import count
 from math import inf, isinf, isnan
 from operator import itemgetter
 from random import choice
 from time import time
 from types import MappingProxyType
-from typing import cast, overload, Any, Literal, Self
+from typing import Any, Literal, Self, cast, overload
 from warnings import warn
 
-from .undefined import undefined, Undefined
+from .undefined import Undefined, undefined
 
 
 class CleanedKeyError(KeyError):
@@ -681,8 +680,7 @@ class Counter[K: Hashable](UserDict[K, int]):
             return sorted(self.items(), key=itemgetter(1), reverse=largest)
         if largest:
             return nlargest(n, self.items(), key=itemgetter(1))
-        else:
-            return nsmallest(n, self.items(), key=itemgetter(1))
+        return nsmallest(n, self.items(), key=itemgetter(1))
 
 
 class LFUDict[K: Hashable, V](SizedDict[K, V]):

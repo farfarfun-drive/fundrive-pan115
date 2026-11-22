@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -17,7 +16,7 @@ __all__ = [
 __doc__ = "各种通用的类型"
 
 from collections.abc import Buffer, Iterable, Mapping
-from http.cookiejar import CookieJar, Cookie
+from http.cookiejar import Cookie, CookieJar
 from http.cookies import Morsel
 from typing import Any, NamedTuple, Self
 
@@ -153,8 +152,7 @@ class P115DictAttrLike(P115DictAttrLikeMixin):
     def __new__(cls, val: Any = undefined, /, *args, **kwds):
         if val is undefined:
             return super().__new__(cls)
-        else:
-            return super().__new__(cls, val)  # type: ignore
+        return super().__new__(cls, val)  # type: ignore
 
     def __init__(self, val: Any = undefined, /, *args, **kwds):
         self.__dict__.update(*args, **kwds)

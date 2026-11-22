@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -24,53 +23,57 @@ from collections.abc import (
 from datetime import date, datetime, timedelta
 from hashlib import md5, sha1
 from http.cookiejar import Cookie, CookieJar
-from http.cookies import Morsel, BaseCookie
+from http.cookies import BaseCookie, Morsel
 from inspect import isawaitable
 from operator import itemgetter
-from os import fsdecode, isatty, PathLike
+from os import PathLike, fsdecode, isatty
 from pathlib import Path, PurePath
-from re import compile as re_compile, Match, MULTILINE
+from re import MULTILINE, Match
+from re import compile as re_compile
 from string import digits
 from threading import Lock
 from time import time
-from typing import cast, overload, Any, Final, Literal, Self
+from typing import Any, Final, Literal, Self, cast, overload
 from urllib.parse import parse_qsl, quote, unquote, urlencode, urlsplit
 from uuid import uuid4
 from warnings import warn
 
+from orjson import dumps, loads
+from yarl import URL
+
 from fundrives.pan115._vendor.asynctools import ensure_async
 from fundrives.pan115._vendor.cookietools import cookies_to_dict, update_cookies
 from fundrives.pan115._vendor.dicttools import (
-    get_first,
-    dict_update,
-    dict_key_to_lower_merge,
-    iter_items,
     KeyLowerDict,
+    dict_key_to_lower_merge,
+    dict_update,
+    get_first,
+    iter_items,
 )
 from fundrives.pan115._vendor.ensure import ensure_bytes
 from fundrives.pan115._vendor.errno2 import errno
-from fundrives.pan115._vendor.filewrap import to_bytes_view, SupportsRead
+from fundrives.pan115._vendor.filewrap import SupportsRead, to_bytes_view
 from fundrives.pan115._vendor.http_request import (
-    complete_url as make_url,
     SupportsGeturl,
 )
+from fundrives.pan115._vendor.http_request import (
+    complete_url as make_url,
+)
 from fundrives.pan115._vendor.http_response import get_status_code
-from fundrives.pan115._vendor.httpfile import HTTPFileReader, AsyncHTTPFileReader
+from fundrives.pan115._vendor.httpfile import AsyncHTTPFileReader, HTTPFileReader
 from fundrives.pan115._vendor.iterutils import run_gen_step
-from orjson import dumps, loads
 from fundrives.pan115._vendor.p115cipher import (
-    rsa_encrypt,
-    rsa_decrypt,
-    ecdh_aes_encrypt,
     ecdh_aes_decrypt,
+    ecdh_aes_encrypt,
     ecdh_encode_token,
     make_upload_payload,
+    rsa_decrypt,
+    rsa_encrypt,
 )
 from fundrives.pan115._vendor.p115oss import upload_file
 from fundrives.pan115._vendor.p115pickcode import to_id, to_pickcode
 from fundrives.pan115._vendor.property import locked_cacheproperty
 from fundrives.pan115._vendor.temporary import temp_globals
-from yarl import URL
 
 from .const import (
     CLIENT_API_METHODS_MAP,
@@ -78,19 +81,18 @@ from .const import (
     SSOENT_TO_APP,
 )
 from .exception import (
-    throw,
-    P115OSError,
-    P115Warning,
     P115AccessTokenError,
     P115AuthenticationError,
+    P115DownloadFileNotFoundError,
     P115LoginError,
     P115OpenAppAuthLimitExceeded,
     P115OperationalError,
-    P115DownloadFileNotFoundError,
+    P115OSError,
+    P115Warning,
+    throw,
 )
-from .type import P115Cookies, P115URL
-from .util import complete_url, share_extract_payload, normalize_pickcode
-
+from .type import P115URL, P115Cookies
+from .util import complete_url, normalize_pickcode, share_extract_payload
 
 CRE_SET_COOKIE: Final = re_compile(r"[0-9a-f]{32}=[0-9a-f]{32}.*")
 CRE_COOKIES_UID_search: Final = re_compile(r"(?<=\bUID=)[^\s;]+").search
@@ -537,7 +539,7 @@ def check_response(resp: dict | Awaitable[dict], /) -> dict | Coroutine[Any, Any
 
     if isinstance(resp, dict):
         return check(resp)
-    elif isawaitable(resp):
+    if isawaitable(resp):
 
         async def check_await() -> dict:
             return check(await resp)
@@ -1129,8 +1131,7 @@ class ClientRequestMixin:
                     "data": dict(parse_qsl(urlsplit(resp.headers["location"]).query)),
                     "headers": dict(resp.headers),
                 }
-            else:
-                return json_maybe_decrypt_loads(content)
+            return json_maybe_decrypt_loads(content)
 
         request_kwargs.setdefault("parse", parse)
         request, request_kwargs = get_request(
@@ -8330,7 +8331,7 @@ class P115Client(P115OpenClient):
             - share_id: int | str 💡 共享 id
         """
         if app in ("", "web", "desktop", "chrome"):
-            api = complete_url(f"/app/chrome/downfolder", base_url)
+            api = complete_url("/app/chrome/downfolder", base_url)
         else:
             api = complete_url("/folder/downfolder", base_url=base_url, app=app)
         if isinstance(payload, str):
@@ -12836,7 +12837,7 @@ class P115Client(P115OpenClient):
         if isinstance(payload, (int, str)):
             payload = {"file_id": payload}
         elif isinstance(payload, tuple):
-            payload = {f"file_id[i]": p for i, p in enumerate(payload)}
+            payload = {"file_id[i]": p for i, p in enumerate(payload)}
         return self.request(
             url=api, method="POST", data=payload, async_=async_, **request_kwargs
         )
@@ -21828,10 +21829,7 @@ class P115Client(P115OpenClient):
         payload.setdefault("limit", 1150)
         if request_kwargs.get("method", "").upper() == "POST":
             return self.request(url=api, data=payload, async_=async_, **request_kwargs)
-        else:
-            return self.request(
-                url=api, params=payload, async_=async_, **request_kwargs
-            )
+        return self.request(url=api, params=payload, async_=async_, **request_kwargs)
 
     @overload
     def note_cate_add(
@@ -22539,10 +22537,7 @@ class P115Client(P115OpenClient):
             payload = {"note_id": ",".join(map(str, payload))}
         if request_kwargs.get("method", "").upper() == "POST":
             return self.request(url=api, data=payload, async_=async_, **request_kwargs)
-        else:
-            return self.request(
-                url=api, params=payload, async_=async_, **request_kwargs
-            )
+        return self.request(url=api, params=payload, async_=async_, **request_kwargs)
 
     @overload
     def note_list(
@@ -22827,10 +22822,7 @@ class P115Client(P115OpenClient):
         payload = {"has_picknews": 1, "limit": 1150, "start": 0, **payload}
         if request_kwargs.get("method", "").upper() == "POST":
             return self.request(url=api, data=payload, async_=async_, **request_kwargs)
-        else:
-            return self.request(
-                url=api, params=payload, async_=async_, **request_kwargs
-            )
+        return self.request(url=api, params=payload, async_=async_, **request_kwargs)
 
     @overload
     def note_set_cate(
@@ -24924,20 +24916,17 @@ class P115Client(P115OpenClient):
             return self.request(
                 url=api, method="POST", data=payload, async_=async_, **request_kwargs
             )
-        else:
-            if app not in (
-                "windows",
-                "mac",
-                "linux",
-                "os_windows",
-                "os_mac",
-                "os_linux",
-            ):
-                app = "os_windows"
-            api = complete_url("/2.0/share/downurl", base_url=base_url, app=app)
-            return self.request(
-                url=api, params=payload, async_=async_, **request_kwargs
-            )
+        if app not in (
+            "windows",
+            "mac",
+            "linux",
+            "os_windows",
+            "os_mac",
+            "os_linux",
+        ):
+            app = "os_windows"
+        api = complete_url("/2.0/share/downurl", base_url=base_url, app=app)
+        return self.request(url=api, params=payload, async_=async_, **request_kwargs)
 
     @overload
     def share_download_url_web(
@@ -30902,17 +30891,16 @@ class P115Client(P115OpenClient):
     ) -> P115FileSystemBase:
         if arg is None:
             return P115FileSystem(self, refresh=refresh, id_to_readdir=id_to_readdir)
-        elif isinstance(arg, int):
+        if isinstance(arg, int):
             return P115ZipFileSystem(
                 self,
                 self.to_pickcode(arg),
                 refresh=refresh,
                 id_to_readdir=id_to_readdir,
             )
-        else:
-            return P115ShareFileSystem(
-                self, arg, refresh=refresh, id_to_readdir=id_to_readdir
-            )
+        return P115ShareFileSystem(
+            self, arg, refresh=refresh, id_to_readdir=id_to_readdir
+        )
 
 
 with temp_globals():
@@ -30934,8 +30922,8 @@ with temp_globals():
 
 
 from .fs import (
-    P115FileSystemBase,
     P115FileSystem,
+    P115FileSystemBase,
     P115ShareFileSystem,
     P115ZipFileSystem,
 )

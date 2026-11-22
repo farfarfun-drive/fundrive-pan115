@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -23,21 +22,23 @@ from functools import partial
 from io import BufferedReader, TextIOWrapper
 from mimetypes import guess_type
 from operator import itemgetter
-from os import path as ospath, fsdecode, stat_result, PathLike
+from os import PathLike, fsdecode, stat_result
+from os import path as ospath
 from posixpath import splitext
-from re import compile as re_compile, escape as re_escape
+from re import compile as re_compile
+from re import escape as re_escape
 from stat import S_IFDIR, S_IFREG
 from threading import Lock
 from time import time
 from typing import (
-    cast,
-    overload,
     Any,
     ClassVar,
     Final,
     Literal,
     Self,
     TypedDict,
+    cast,
+    overload,
 )
 from weakref import WeakValueDictionary
 
@@ -50,20 +51,22 @@ from fundrives.pan115._vendor.glob_pattern import translate_iter
 from fundrives.pan115._vendor.hashtools import (
     HashObj,
     file_digest,
-    file_mdigest,
     file_digest_async,
+    file_mdigest,
     file_mdigest_async,
 )
 from fundrives.pan115._vendor.httpfile import AsyncHTTPFileReader, HTTPFileReader
 from fundrives.pan115._vendor.id2dirnode import IdToDirnode
 from fundrives.pan115._vendor.iterdir import iterdir_generic, walk_generic
 from fundrives.pan115._vendor.iterutils import (
-    map as do_map,
+    Yield,
+    YieldFrom,
     run_gen_step,
     run_gen_step_iter,
     with_iter_next,
-    Yield,
-    YieldFrom,
+)
+from fundrives.pan115._vendor.iterutils import (
+    map as do_map,
 )
 from fundrives.pan115._vendor.posixpatht import (
     escape,
@@ -73,12 +76,11 @@ from fundrives.pan115._vendor.posixpatht import (
     path_is_dir_form,
     splits,
 )
-from fundrives.pan115._vendor.undefined import undefined, is_undefined, Undefined
+from fundrives.pan115._vendor.undefined import Undefined, is_undefined, undefined
 
 from ..client import P115Client
 from ..exception import throw
 from ..type import P115URL
-
 
 type IDOrPathType = int | str | Sequence[str] | Mapping | P115PathBase
 
@@ -2849,7 +2851,7 @@ class P115FileSystemBase[P115PathType: P115PathBase](ABC):
                 async_=async_,
                 **request_kwargs,
             )
-        elif len(pattern) >= 2 and not pattern.strip("*"):
+        if len(pattern) >= 2 and not pattern.strip("*"):
             return self.iter(
                 top,
                 max_depth=-1,
@@ -3223,16 +3225,15 @@ class P115FileSystemBase[P115PathType: P115PathBase](ABC):
                         return await file_digest_async(file, digest, stop=size)
 
                 return request()
-            else:
-                with self.open(
-                    id_or_path,
-                    mode="rb",
-                    start=start,
-                    pid=pid,
-                    refresh=refresh,
-                    **request_kwargs,
-                ) as file:
-                    return file_digest(file, digest, stop=size)
+            with self.open(
+                id_or_path,
+                mode="rb",
+                start=start,
+                pid=pid,
+                refresh=refresh,
+                **request_kwargs,
+            ) as file:
+                return file_digest(file, digest, stop=size)
 
         return run_gen_step(gen_step, async_)
 
@@ -3320,16 +3321,15 @@ class P115FileSystemBase[P115PathType: P115PathBase](ABC):
                         )
 
                 return request()
-            else:
-                with self.open(
-                    id_or_path,
-                    mode="rb",
-                    start=start,
-                    pid=pid,
-                    refresh=refresh,
-                    **request_kwargs,
-                ) as file:
-                    return file_mdigest(file, digest, *digests, stop=size)
+            with self.open(
+                id_or_path,
+                mode="rb",
+                start=start,
+                pid=pid,
+                refresh=refresh,
+                **request_kwargs,
+            ) as file:
+                return file_mdigest(file, digest, *digests, stop=size)
 
         return run_gen_step(gen_step, async_)
 

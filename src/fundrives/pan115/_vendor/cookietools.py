@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 1, 5)
@@ -31,16 +30,15 @@ from collections.abc import (
 from copy import copy
 from datetime import datetime
 from http.cookiejar import Cookie, CookieJar
-from http.cookies import Morsel, BaseCookie
+from http.cookies import BaseCookie, Morsel
 from posixpath import commonpath
 from re import compile as re_compile
 from time import gmtime, strftime, strptime, time
-from typing import cast, Any
+from typing import Any, cast
 from urllib.parse import urlsplit
 from urllib.request import Request
 
 from .dicttools import iter_items
-
 
 CRE_COOKIE_SEP_split = re_compile(r";\s*").split
 
@@ -166,7 +164,7 @@ def create_morsel(
     elif isinstance(value, Morsel):
         morsel = copy(value)
         if name:
-            setattr(morsel, "_key", name)
+            morsel._key = name
         if not kwargs:
             return morsel
     else:
@@ -202,58 +200,57 @@ def to_cookie(cookie, /, name: str = "", **kwargs) -> Cookie:
         if not name:
             raise ValueError(f"please provide a name for value {cookie!r}")
         return create_cookie(name, cookie)
-    elif isinstance(cookie, Morsel):
+    if isinstance(cookie, Morsel):
         return morsel_to_cookie(cookie)
-    elif isinstance(cookie, Cookie):
+    if isinstance(cookie, Cookie):
         cookie = copy(cookie)
         if name:
             cookie.name = name
         return cookie
+    if isinstance(cookie, Mapping):
+
+        def getval(key, /, default=None):
+            try:
+                return cookie[key]
+            except KeyError:
+                return kwargs.get(key, default)
     else:
-        if isinstance(cookie, Mapping):
 
-            def getval(key, /, default=None):
-                try:
-                    return cookie[key]
-                except KeyError:
-                    return kwargs.get(key, default)
-        else:
+        def getval(key, /, default=None):
+            try:
+                getattr(cookie, key)
+            except AttributeError:
+                return kwargs.get(key, default)
 
-            def getval(key, /, default=None):
-                try:
-                    getattr(cookie, key)
-                except AttributeError:
-                    return kwargs.get(key, default)
-
-        name = getval("name", name)
-        if not name:
-            raise ValueError(f"please provide a name for value {cookie!r}")
-        kwargs = {
-            "name": name,
-            "value": getval("value", ""),
-            "version": getval("version", None) or getval("Version", None),
-            "expires": getval("expires", None),
-            "port": getval("port", None),
-            "domain": getval("domain", "") or getval("Domain", ""),
-            "domain_initial_dot": getval("domain_initial_dot", ""),
-            "path": getval("path", ""),
-            "secure": getval("secure", "") or getval("Secure", ""),
-            "discard": getval("discard", ""),
-            "comment": getval("comment", "") or getval("Comment", ""),
-            "comment_url": getval("comment_url", ""),
-            "rest": getval("rest", None) or {},
-        }
-        rest: dict = kwargs["rest"]
-        for keys in [
-            ("Max-Age", "max-age", "max_age"),
-            ("HttpOnly", "httponly", "http_only"),
-            ("SameSite", "samesite", "same_site"),
-        ]:
-            for key in keys:
-                val = getval(key, None)
-                if val is not None:
-                    rest[keys[0]] = str(val)
-                    break
+    name = getval("name", name)
+    if not name:
+        raise ValueError(f"please provide a name for value {cookie!r}")
+    kwargs = {
+        "name": name,
+        "value": getval("value", ""),
+        "version": getval("version", None) or getval("Version", None),
+        "expires": getval("expires", None),
+        "port": getval("port", None),
+        "domain": getval("domain", "") or getval("Domain", ""),
+        "domain_initial_dot": getval("domain_initial_dot", ""),
+        "path": getval("path", ""),
+        "secure": getval("secure", "") or getval("Secure", ""),
+        "discard": getval("discard", ""),
+        "comment": getval("comment", "") or getval("Comment", ""),
+        "comment_url": getval("comment_url", ""),
+        "rest": getval("rest", None) or {},
+    }
+    rest: dict = kwargs["rest"]
+    for keys in [
+        ("Max-Age", "max-age", "max_age"),
+        ("HttpOnly", "httponly", "http_only"),
+        ("SameSite", "samesite", "same_site"),
+    ]:
+        for key in keys:
+            val = getval(key, None)
+            if val is not None:
+                rest[keys[0]] = str(val)
+                break
     return create_cookie(**kwargs)
 
 
@@ -262,55 +259,54 @@ def to_morsel(cookie, /, name: str = "", **kwargs) -> Morsel:
         if not name:
             raise ValueError(f"please provide a name for value {cookie!r}")
         return create_morsel(name, cookie)
-    elif isinstance(cookie, Morsel):
+    if isinstance(cookie, Morsel):
         morsel = copy(cookie)
         if name:
-            setattr(morsel, "_key", name)
+            morsel._key = name
         return morsel
-    elif isinstance(cookie, Cookie):
+    if isinstance(cookie, Cookie):
         return cookie_to_morsel(cookie)
+    if isinstance(cookie, Mapping):
+
+        def getval(key, /, default=None):
+            try:
+                return cookie[key]
+            except KeyError:
+                return kwargs.get(key, default)
     else:
-        if isinstance(cookie, Mapping):
 
-            def getval(key, /, default=None):
-                try:
-                    return cookie[key]
-                except KeyError:
-                    return kwargs.get(key, default)
-        else:
+        def getval(key, /, default=None):
+            try:
+                getattr(cookie, key)
+            except AttributeError:
+                return kwargs.get(key, default)
 
-            def getval(key, /, default=None):
-                try:
-                    getattr(cookie, key)
-                except AttributeError:
-                    return kwargs.get(key, default)
-
-        name = getval("name", name)
-        if not name:
-            raise ValueError(f"please provide a name for value {cookie!r}")
-        kwargs = {
-            "name": name,
-            "value": getval("value", ""),
-            "version": getval("version", None) or getval("Version", None),
-            "expires": getval("expires", None),
-            "domain": getval("domain", "") or getval("Domain", ""),
-            "path": getval("path", ""),
-            "secure": getval("secure", "") or getval("Secure", ""),
-            "comment": getval("comment", "") or getval("Comment", ""),
-            "rest": getval("rest", None) or {},
-        }
-        rest: dict = kwargs["rest"]
-        for keys in [
-            ("Max-Age", "max-age", "max_age"),
-            ("HttpOnly", "httponly", "http_only"),
-            ("SameSite", "samesite", "same_site"),
-        ]:
-            for key in keys:
-                val = getval(key, None)
-                if val is not None:
-                    rest[keys[0]] = str(val)
-                    break
-        return create_morsel(**kwargs)
+    name = getval("name", name)
+    if not name:
+        raise ValueError(f"please provide a name for value {cookie!r}")
+    kwargs = {
+        "name": name,
+        "value": getval("value", ""),
+        "version": getval("version", None) or getval("Version", None),
+        "expires": getval("expires", None),
+        "domain": getval("domain", "") or getval("Domain", ""),
+        "path": getval("path", ""),
+        "secure": getval("secure", "") or getval("Secure", ""),
+        "comment": getval("comment", "") or getval("Comment", ""),
+        "rest": getval("rest", None) or {},
+    }
+    rest: dict = kwargs["rest"]
+    for keys in [
+        ("Max-Age", "max-age", "max_age"),
+        ("HttpOnly", "httponly", "http_only"),
+        ("SameSite", "samesite", "same_site"),
+    ]:
+        for key in keys:
+            val = getval(key, None)
+            if val is not None:
+                rest[keys[0]] = str(val)
+                break
+    return create_morsel(**kwargs)
 
 
 def cookie_to_morsel(cookie: Cookie, /) -> Morsel:
@@ -413,56 +409,49 @@ def cookies_to_dict(
         if predicate is not None:
             return {name: val for name, val in cookie_it if predicate(name, val)}
         return dict(cookie_it)
-    elif isinstance(cookies, CookieJar):
+    if isinstance(cookies, CookieJar):
         return {
             cookie.name: val
             for cookie in cookies
             if (val := cookie.value) is not None
             and (predicate is None or predicate(cookie.name, cookie))
         }
-    elif isinstance(cookies, BaseCookie):
+    if isinstance(cookies, BaseCookie):
         return {
             name: morsel.value
             for name, morsel in cookies.items()
             if predicate is None or predicate(name, morsel)
         }
-    elif isinstance(cookies, Mapping):
+    if isinstance(cookies, Mapping):
         return {
             name: cookie if isinstance(cookie, str) else cookie.value
             for name, cookie in iter_items(cookies)
             if predicate is None or predicate(name, cookie)
         }
-    else:
-        cookie_it = (
-            cookie[:2]
-            if isinstance(cookie, tuple)
-            else (
-                (
-                    cookie.key
-                    if isinstance(cookie, Morsel)
-                    else getattr(cookie, "name", "")
-                ),
-                cookie,
-            )
-            for cookie in cookies
+    cookie_it = (
+        cookie[:2]
+        if isinstance(cookie, tuple)
+        else (
+            (cookie.key if isinstance(cookie, Morsel) else getattr(cookie, "name", "")),
+            cookie,
         )
-        if predicate is not None:
-            cookie_it = (
-                (name, cookie) for name, cookie in cookie_it if predicate(name, cookie)
+        for cookie in cookies
+    )
+    if predicate is not None:
+        cookie_it = (
+            (name, cookie) for name, cookie in cookie_it if predicate(name, cookie)
+        )
+    return {
+        key: val
+        for key, cookie in cookie_it
+        if key
+        and (
+            val := (
+                cookie if isinstance(cookie, str) else getattr(cookie, "value", None)
             )
-        return {
-            key: val
-            for key, cookie in cookie_it
-            if key
-            and (
-                val := (
-                    cookie
-                    if isinstance(cookie, str)
-                    else getattr(cookie, "value", None)
-                )
-            )
-            is not None
-        }
+        )
+        is not None
+    }
 
 
 def cookies_to_str(

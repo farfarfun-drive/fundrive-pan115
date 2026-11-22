@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -20,17 +19,17 @@ from collections.abc import (
     AsyncIterator,
     Awaitable,
     Buffer,
-    Iterable,
     Callable,
     Coroutine,
+    Iterable,
     Iterator,
     Mapping,
     Sequence,
 )
 from inspect import isawaitable
 from itertools import count, dropwhile
-from os import fsdecode, PathLike
-from typing import cast, overload, Any, Literal, NamedTuple
+from os import PathLike, fsdecode
+from typing import Any, Literal, NamedTuple, cast, overload
 
 from fundrives.pan115._vendor.asynctools import async_collect
 
@@ -39,43 +38,45 @@ try:
 except ImportError:
     from fundrives.pan115._vendor.concurrenttools import (
         async_conmap as taskgroup_map,
+    )
+    from fundrives.pan115._vendor.concurrenttools import (
         thread_conmap as threadpool_map,
     )
-from fundrives.pan115._vendor.dicttools import get_first
-from fundrives.pan115._vendor.dicttools import dict_map
+from yarl import URL
+
+from fundrives.pan115._vendor.dicttools import dict_map, get_first
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.filewrap import SupportsRead
 from fundrives.pan115._vendor.hashtools import file_mdigest, file_mdigest_async
 from fundrives.pan115._vendor.http_request import SupportsGeturl
 from fundrives.pan115._vendor.http_response import get_total_length
 from fundrives.pan115._vendor.iterutils import (
+    Yield,
+    YieldFrom,
     as_gen_step,
     foreach,
     run_gen_step,
     run_gen_step_iter,
     with_iter_next,
-    Yield,
-    YieldFrom,
 )
 from fundrives.pan115._vendor.p115oss import (
-    upload_file_init,
-    oss_multipart_upload_init,
-    oss_multipart_upload_complete,
-    oss_multipart_upload_url,
     oss_multipart_part_iter,
+    oss_multipart_upload_complete,
+    oss_multipart_upload_init,
     oss_multipart_upload_part_iter,
+    oss_multipart_upload_url,
+    upload_file_init,
 )
 from fundrives.pan115._vendor.p115pickcode import to_id
-from yarl import URL
 
-from ..client import check_response, P115Client, P115OpenClient
+from ..client import P115Client, P115OpenClient, check_response
 from ..exception import P115BadFile
-from ..type import P115URL
 from ..tool import load_final_image
+from ..type import P115URL
 from .attr import normalize_attr_simple
 from .download import iter_download_files
 from .edit import makedir
-from .iterdir import iterdir, iter_files_with_path, unescape_115_charref
+from .iterdir import iter_files_with_path, iterdir, unescape_115_charref
 
 
 @overload
@@ -382,8 +383,7 @@ def iter_115_to_115(
         )
     if async_:
         return taskgroup_map(upload, it, max_workers=max_workers)
-    else:
-        return threadpool_map(upload, it, max_workers=max_workers)
+    return threadpool_map(upload, it, max_workers=max_workers)
 
 
 # TODO: 需要优化，减少代码量
@@ -1013,23 +1013,22 @@ def upload_init(
             async_=async_,
             **request_kwargs,
         )
-    else:
-        request_kwargs["headers"] = dict(
-            request_kwargs.get("headers") or (),
-            authorization=client.headers["authorization"],
-        )
-        return upload_file_init(
-            file=file,
-            pid=to_id(pid),
-            share_id=share_id,
-            filesha1=filesha1,
-            filesize=filesize,
-            filename=filename,
-            dirname=dirname,
-            endpoint=endpoint,
-            async_=async_,
-            **request_kwargs,
-        )
+    request_kwargs["headers"] = dict(
+        request_kwargs.get("headers") or (),
+        authorization=client.headers["authorization"],
+    )
+    return upload_file_init(
+        file=file,
+        pid=to_id(pid),
+        share_id=share_id,
+        filesha1=filesha1,
+        filesize=filesize,
+        filename=filename,
+        dirname=dirname,
+        endpoint=endpoint,
+        async_=async_,
+        **request_kwargs,
+    )
 
 
 # TODO: 对这个函数还需要一些优化，确保更易于使用，而且即使失败，也能获得下次继续的信息

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "complete_url",
@@ -35,10 +34,10 @@ from collections.abc import (
     Sequence,
 )
 from contextlib import (
-    contextmanager,
-    asynccontextmanager,
-    suppress,
     AbstractAsyncContextManager,
+    asynccontextmanager,
+    contextmanager,
+    suppress,
 )
 from http import HTTPStatus
 from inspect import isawaitable, iscoroutinefunction
@@ -47,8 +46,6 @@ from os.path import abspath
 from re import compile as re_compile
 from string import ascii_uppercase, digits, hexdigits
 from typing import (
-    cast,
-    overload,
     Any,
     AsyncContextManager,
     ContextManager,
@@ -56,18 +53,20 @@ from typing import (
     Literal,
     NotRequired,
     TypedDict,
+    cast,
+    overload,
 )
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from filelock import FileLock
-from fundrives.pan115._vendor.iterutils import run_gen_step
-from orjson import loads, dumps
-from fundrives.pan115._vendor.p115pickcode import is_valid_pickcode, to_id, to_pickcode
-from fundrives.pan115._vendor.urllib3_future_request import request
+from orjson import dumps, loads
 from yarl import URL
 
-from .const import _CACHE_DIR
+from fundrives.pan115._vendor.iterutils import run_gen_step
+from fundrives.pan115._vendor.p115pickcode import is_valid_pickcode, to_id, to_pickcode
+from fundrives.pan115._vendor.urllib3_future_request import request
 
+from .const import _CACHE_DIR
 
 URL_PATH_TRANSTAB: Final = {b: f"%{b:X}" for b in b"?#"}
 CRE_115_CHARREF_sub: Final = re_compile("\\[\x02([0-9]+)\\]").sub
@@ -405,7 +404,7 @@ def share_extract_payload(link: str, /) -> SharePayload:
     link = link.strip("/#")
     if link.isalnum():
         return SharePayload(share_code=link)
-    elif m := CRE_SHARE_LINK_search(link):
+    if m := CRE_SHARE_LINK_search(link):
         return cast(SharePayload, m.groupdict())
     urlp = urlsplit(link)
     if urlp.path:
@@ -416,8 +415,7 @@ def share_extract_payload(link: str, /) -> SharePayload:
                     payload["receive_code"] = v
                     break
         return payload
-    else:
-        raise ValueError("can't extract share_code from {link!r}")
+    raise ValueError("can't extract share_code from {link!r}")
 
 
 def unescape_115_charref(s: str, /) -> str:
@@ -470,7 +468,7 @@ def to_cdn_url(
     original_host = urlp.host
     if original_host == "115.com":
         return str(urlp.with_host(host).with_path("/site" + urlp.path))
-    elif (
+    if (
         not original_host
         or not original_host.endswith(".115.com")
         or len(original_host.split(".", 3)) > 3
@@ -568,9 +566,8 @@ def call_with_lock[**Args, R](
 
     if isinstance(lock, AbstractAsyncContextManager) or iscoroutinefunction(func):
         return async_call(func, *args, **kwds)
-    else:
-        with lock:
-            return func(*args, **kwds)
+    with lock:
+        return func(*args, **kwds)
 
 
 def get_stable_point(user_id: int | str) -> str:

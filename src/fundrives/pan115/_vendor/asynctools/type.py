@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = ["AsyncReversible"]
 
 from abc import abstractmethod
 from collections.abc import AsyncIterable, AsyncIterator
-from typing import runtime_checkable, Protocol
+from typing import Protocol, runtime_checkable
 
 try:
     from collections.abc import _check_methods  # type: ignore

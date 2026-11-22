@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "killable_executor",
@@ -16,15 +15,24 @@ __all__ = [
     "conmap_wrap",
 ]
 
+from _thread import start_new_thread
 from asyncio import (
+    BaseEventLoop,
+    TaskGroup,
     ensure_future,
     get_event_loop,
-    BaseEventLoop,
+)
+from asyncio import (
     CancelledError as AsyncCancelledError,
+)
+from asyncio import (
     Future as AsyncFuture,
+)
+from asyncio import (
     Queue as AsyncQueue,
+)
+from asyncio import (
     Semaphore as AsyncSemaphore,
-    TaskGroup,
 )
 from collections.abc import (
     AsyncIterable,
@@ -40,10 +48,9 @@ from contextlib import contextmanager
 from functools import partial, update_wrapper
 from inspect import isawaitable, iscoroutinefunction
 from os import cpu_count
-from queue import Queue, SimpleQueue, Empty
-from _thread import start_new_thread
+from queue import Empty, Queue, SimpleQueue
 from threading import Event, Lock, Semaphore, Thread
-from typing import cast, overload, Any, ContextManager, Literal
+from typing import Any, ContextManager, Literal, cast, overload
 
 from fundrives.pan115._vendor.argtools import argcount, has_keyword_arg
 from fundrives.pan115._vendor.asynctools import (
@@ -54,19 +61,12 @@ from fundrives.pan115._vendor.asynctools import (
 )
 from fundrives.pan115._vendor.decotools import optional
 
-
 if "__del__" not in ThreadPoolExecutor.__dict__:
-    setattr(
-        ThreadPoolExecutor,
-        "__del__",
-        lambda self, /: self.shutdown(wait=False, cancel_futures=True),
+    ThreadPoolExecutor.__del__ = lambda self, /: self.shutdown(
+        wait=False, cancel_futures=True
     )
 if "__del__" not in TaskGroup.__dict__:
-    setattr(
-        TaskGroup,
-        "__del__",
-        lambda self, /: run_async(self.__aexit__(None, None, None)),
-    )
+    TaskGroup.__del__ = lambda self, /: run_async(self.__aexit__(None, None, None))
 
 
 @contextmanager
@@ -279,7 +279,7 @@ def run_as_thread[**Args, T](
     *args: Args.args,
     **kwargs: Args.kwargs,
 ) -> Future[T]:
-    return getattr(threaded, "__wrapped__")(func)(*args, **kwargs)
+    return threaded.__wrapped__(func)(*args, **kwargs)
 
 
 @optional
@@ -317,7 +317,7 @@ def run_as_async[**Args, T](
     *args: Args.args,
     **kwargs: Args.kwargs,
 ) -> AsyncFuture[T]:
-    return getattr(asynchronized, "__wrapped__")(func)(*args, **kwargs)
+    return asynchronized.__wrapped__(func)(*args, **kwargs)
 
 
 def threadpool_map[T](

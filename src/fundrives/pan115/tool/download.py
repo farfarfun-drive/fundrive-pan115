@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "get_pic_url",
@@ -18,8 +17,10 @@ __doc__ = "这个模块提供了一些和下载有关的函数"
 
 from asyncio import (
     create_task,
-    gather as async_gather,
     to_thread,
+)
+from asyncio import (
+    gather as async_gather,
 )
 from base64 import b32decode
 from collections.abc import (
@@ -37,13 +38,13 @@ from collections.abc import (
 from functools import partial
 from inspect import isawaitable
 from itertools import batched, chain, cycle
-from os import cpu_count, makedirs, PathLike
+from os import PathLike, cpu_count, makedirs
 from os.path import dirname, getsize
 from re import compile as re_compile
-from string import hexdigits, ascii_uppercase
+from string import ascii_uppercase, hexdigits
 from types import EllipsisType
-from typing import cast, overload, Any, Final, Literal
-from urllib.request import urlopen, Request
+from typing import Any, Final, Literal, cast, overload
+from urllib.request import Request, urlopen
 from uuid import uuid4
 from warnings import warn
 
@@ -51,48 +52,49 @@ from fundrives.pan115._vendor.argtools import argcount
 from fundrives.pan115._vendor.asynctools import async_chain_from_iterable
 from fundrives.pan115._vendor.concurrenttools import (
     conmap,
-    run_as_thread,
     iter_page,
     iter_page_multi,
+    run_as_thread,
 )
 from fundrives.pan115._vendor.dicttools import get_first
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.filewrap import (
-    bio_chunk_iter,
     bio_chunk_async_iter,
-    bytes_to_chunk_iter,
+    bio_chunk_iter,
     bytes_to_chunk_async_iter,
+    bytes_to_chunk_iter,
 )
 from fundrives.pan115._vendor.http_response import get_status_code, is_timeouterror
 from fundrives.pan115._vendor.iterutils import (
-    chunked,
-    map as do_map,
+    Yield,
+    YieldFrom,
     chain_from_iterable,
+    chunked,
     run_gen_step,
     run_gen_step_iter,
     through,
-    wrap_iter,
-    wrap_aiter,
     with_iter_next,
-    Yield,
-    YieldFrom,
+    wrap_aiter,
+    wrap_iter,
+)
+from fundrives.pan115._vendor.iterutils import (
+    map as do_map,
 )
 from fundrives.pan115._vendor.p115pickcode import to_id
 
 from ..client import (
-    check_response,
-    json_maybe_decrypt_parse,
+    P115URL,
     P115Client,
     P115OpenClient,
-    P115URL,
+    check_response,
+    json_maybe_decrypt_parse,
 )
 from ..const import ID_TO_DIRNODE_CACHE
-from ..exception import P115Warning, P115AccessError
+from ..exception import P115AccessError, P115Warning
 from ..type import TaskResultTuple
 from ..util import reduce_image_url_layers
-from .attr import normalize_attr, normalize_attr_simple, get_attr, get_info
-from .iterdir import iterdir, iter_files, unescape_115_charref
-
+from .attr import get_attr, get_info, normalize_attr, normalize_attr_simple
+from .iterdir import iter_files, iterdir, unescape_115_charref
 
 _get_pic_url_next_select: Final = cycle(
     ("life_v1", "life_v2", "note_v1", "note_v2")
@@ -185,9 +187,9 @@ def get_pic_url(
     def formalize_sha1(sha1):
         if len(sha1) and not sha1.upper().lstrip(ascii_uppercase):
             return b32decode(sha1).hex().upper()
-        elif len(sha1) == 40 and not sha1.lstrip(hexdigits):
+        if len(sha1) == 40 and not sha1.lstrip(hexdigits):
             return sha1.upper()
-        elif not _match_fhn_prefix(sha1):
+        if not _match_fhn_prefix(sha1):
             return "fhnfile_" + sha1
         return sha1
 
@@ -1306,7 +1308,7 @@ def iter_download_nodes(
         def ensure_names(attrs: Sequence[dict], /):
             if not attrs:
                 return attrs
-            elif async_:
+            if async_:
 
                 async def request(attrs=attrs, /):
                     while True:
@@ -1324,18 +1326,17 @@ def iter_download_nodes(
                     return attrs
 
                 return request()
-            else:
-                while True:
-                    resp = file_skim(
-                        (a["id"] for a in attrs),
-                        method="POST",
-                        **request_kwargs,
-                    )
-                    if resp["state"] or resp.get("error") != "参数错误。":
-                        break
-                if resp.get("error") != "文件不存在":
-                    check_response(resp)
-                    update_attrs_by_data(attrs, resp["data"])
+            while True:
+                resp = file_skim(
+                    (a["id"] for a in attrs),
+                    method="POST",
+                    **request_kwargs,
+                )
+                if resp["state"] or resp.get("error") != "参数错误。":
+                    break
+            if resp.get("error") != "文件不存在":
+                check_response(resp)
+                update_attrs_by_data(attrs, resp["data"])
             return attrs
 
         it = conmap(ensure_names, it, max_workers=max_workers, async_=async_)
@@ -1480,113 +1481,112 @@ def iter_download_files(
                 **request_kwargs,
             ),
         )
-    else:
 
-        class BoolRaise:
-            def __init__(self, /, exception):
-                self.exception = exception
+    class BoolRaise:
+        def __init__(self, /, exception):
+            self.exception = exception
 
-            def __bool__(self, /):
-                raise self.exception
+        def __bool__(self, /):
+            raise self.exception
 
-        path_not_already: bool | BoolRaise = True
+    path_not_already: bool | BoolRaise = True
 
-        def set_path_already(fu, /):
-            nonlocal path_not_already
-            if isinstance(fu, BaseException):
-                exc = fu
-            else:
-                exc = fu.exception()
-            if exc is None:
-                path_not_already = False
-            else:
-                path_not_already = BoolRaise(exc)
+    def set_path_already(fu, /):
+        nonlocal path_not_already
+        if isinstance(fu, BaseException):
+            exc = fu
+        else:
+            exc = fu.exception()
+        if exc is None:
+            path_not_already = False
+        else:
+            path_not_already = BoolRaise(exc)
 
-        def gen_step():
-            nonlocal path_already
-            path_already = False
+    def gen_step():
+        nonlocal path_already
+        path_already = False
 
-            def load_ancestors():
-                return through(
-                    iter_download_nodes(
+        def load_ancestors():
+            return through(
+                iter_download_nodes(
+                    client,
+                    cid,
+                    files=False,
+                    id_to_dirnode=id_to_dirnode,
+                    max_page=max_dirs > 0 and -(-max_dirs // 5000),
+                    max_workers=max_workers,
+                    app="os_windows",
+                    async_=async_,
+                    **request_kwargs,
+                )
+            )
+
+        if async_:
+            task: Any = create_task(load_ancestors())
+        else:
+            task = run_as_thread(load_ancestors)
+        if cid:
+            from .attr import get_ancestors
+
+            def update_top():
+                return (
+                    yield get_ancestors(
                         client,
                         cid,
-                        files=False,
                         id_to_dirnode=id_to_dirnode,
-                        max_page=max_dirs > 0 and -(-max_dirs // 5000),
-                        max_workers=max_workers,
-                        app="os_windows",
+                        ensure_file=False,
+                        app=app,
                         async_=async_,
                         **request_kwargs,
                     )
                 )
 
             if async_:
-                task: Any = create_task(load_ancestors())
+                task2 = async_gather(run_gen_step(update_top, True), task)
+                task2.add_done_callback(set_path_already)
             else:
-                task = run_as_thread(load_ancestors)
-            if cid:
-                from .attr import get_ancestors
+                task0 = run_as_thread(run_gen_step, update_top, False)
 
-                def update_top():
-                    return (
-                        yield get_ancestors(
-                            client,
-                            cid,
-                            id_to_dirnode=id_to_dirnode,
-                            ensure_file=False,
-                            app=app,
-                            async_=async_,
-                            **request_kwargs,
-                        )
-                    )
+                def done_callback(fu, /):
+                    try:
+                        task0.result()
+                    except BaseException as e:
+                        set_path_already(e)
+                    else:
+                        set_path_already(fu)
 
-                if async_:
-                    task2 = async_gather(run_gen_step(update_top, True), task)
-                    task2.add_done_callback(set_path_already)
-                else:
-                    task0 = run_as_thread(run_gen_step, update_top, False)
-
-                    def done_callback(fu, /):
-                        try:
-                            task0.result()
-                        except BaseException as e:
-                            set_path_already(e)
-                        else:
-                            set_path_already(fu)
-
-                    task.add_done_callback(done_callback)
-            else:
-                task.add_done_callback(set_path_already)
-            cache: list[dict] = []
-            add_to_cache = cache.append
-            with with_iter_next(
-                iter_download_nodes(
-                    client,
-                    cid,
-                    files=True,
-                    ensure_name=ensure_name,
-                    max_page=max_files > 0 and -(-max_files // 5000),
-                    max_workers=max_workers,
-                    app=app,
-                    async_=async_,
-                    **request_kwargs,
-                )
-            ) as get_next:
-                while path_not_already:
-                    add_to_cache((yield get_next()))
-                if cache:
-                    yield YieldFrom(do_map(update_attr, cache))
-                    cache.clear()
-                while True:
-                    yield Yield(update_attr((yield get_next())))
+                task.add_done_callback(done_callback)
+        else:
+            task.add_done_callback(set_path_already)
+        cache: list[dict] = []
+        add_to_cache = cache.append
+        with with_iter_next(
+            iter_download_nodes(
+                client,
+                cid,
+                files=True,
+                ensure_name=ensure_name,
+                max_page=max_files > 0 and -(-max_files // 5000),
+                max_workers=max_workers,
+                app=app,
+                async_=async_,
+                **request_kwargs,
+            )
+        ) as get_next:
+            while path_not_already:
+                add_to_cache((yield get_next()))
             if cache:
-                if async_:
-                    yield task
-                else:
-                    task.result()
-                bool(path_not_already)
                 yield YieldFrom(do_map(update_attr, cache))
+                cache.clear()
+            while True:
+                yield Yield(update_attr((yield get_next())))
+        if cache:
+            if async_:
+                yield task
+            else:
+                task.result()
+            bool(path_not_already)
+            yield YieldFrom(do_map(update_attr, cache))
 
     return run_gen_step_iter(gen_step, async_)
 
@@ -1662,10 +1662,12 @@ def get_remaining_open_count(
                     else:
                         file = urlopen(request)
                     add_to_cache(file)
+        except Exception:
+            pass
         finally:
             for f in cache:
                 f.close()
-            return len(cache)
+        return len(cache)
 
     return run_gen_step(gen_step, async_)
 

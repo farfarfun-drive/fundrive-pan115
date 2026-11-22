@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "areversed",
@@ -11,16 +10,16 @@ __all__ = [
 ]
 
 from collections.abc import (
+    AsyncIterable,
+    AsyncIterator,
     Awaitable,
     Callable,
     Iterable,
-    AsyncIterable,
-    AsyncIterator,
     Reversible,
 )
-from typing import cast, overload, Any
+from typing import Any, cast, overload
 
-from fundrives.pan115._vendor.undefined import undefined, Undefined
+from fundrives.pan115._vendor.undefined import Undefined, undefined
 
 from .basic import ensure_aiter, ensure_async, to_aiter
 from .type import AsyncReversible
@@ -115,11 +114,10 @@ async def async_next[T, T2](
 ) -> T | T2:
     if default is undefined:
         return await anext(iter)
-    else:
-        try:
-            return await anext(iter)
-        except StopAsyncIteration:
-            return cast(T2, default)
+    try:
+        return await anext(iter)
+    except StopAsyncIteration:
+        return cast(T2, default)
 
 
 def async_reversed[T](

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 """This module provides several classes, which are used to collect
 some arguments at one time and then use them repeatedly later.
@@ -12,7 +11,7 @@ __all__ = ["argcount", "has_keyword_arg", "Args", "UpdativeArgs", "Call"]
 from collections.abc import Callable
 from copy import copy
 from functools import partial, update_wrapper
-from inspect import getfullargspec, signature, Parameter
+from inspect import Parameter, getfullargspec, signature
 from types import MethodType, MethodWrapperType
 from typing import Any
 
@@ -84,16 +83,15 @@ class Args:
         kget = self.kwargs.__getitem__
         if isinstance(idx, str):
             return cls(idx=kget(idx))
-        else:
-            pargs: list = []
-            kargs: dict = {}
-            add_parg = pargs.append
-            for idx_ in idx:
-                if isinstance(idx_, (int, slice)):
-                    add_parg(pget(idx_))
-                else:
-                    kargs[idx_] = kget(idx_)
-            return cls(*pargs, **kargs)
+        pargs: list = []
+        kargs: dict = {}
+        add_parg = pargs.append
+        for idx_ in idx:
+            if isinstance(idx_, (int, slice)):
+                add_parg(pget(idx_))
+            else:
+                kargs[idx_] = kget(idx_)
+        return cls(*pargs, **kargs)
 
     def __iter__(self, /):
         return iter((self.args, self.kwargs))
@@ -127,10 +125,9 @@ class Args:
         args_type = type(args)
         if args_type is tuple:
             return func(*args)
-        elif args_type is dict:
+        if args_type is dict:
             return func(**args)
-        else:
-            return func(args)
+        return func(args)
 
 
 class UpdativeArgs(Args):

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -19,7 +18,6 @@ __all__ = [
 from collections import UserDict
 from collections.abc import Iterator, Mapping, MutableMapping
 from typing import Generic, Self, TypeVar
-
 
 K = TypeVar("K")
 V = TypeVar("V")
@@ -71,8 +69,7 @@ class MapAttr[K, V]:
         cls = type(self)
         if (mod := cls.__module__) == "__main__":
             return f"{cls.__qualname__}({self.__dict__})"
-        else:
-            return f"{mod}.{cls.__qualname__}({self.__dict__})"
+        return f"{mod}.{cls.__qualname__}({self.__dict__})"
 
     @classmethod
     def of(

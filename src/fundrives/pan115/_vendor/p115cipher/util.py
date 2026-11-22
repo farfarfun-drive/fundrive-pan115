@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
-from collections.abc import Callable, Iterator
-
-from fundrives.pan115._vendor.filewrap import to_bytes_view
-from collections.abc import Buffer
+from collections.abc import Buffer, Callable, Iterator
 from typing import Final, Literal
 
+from fundrives.pan115._vendor.filewrap import to_bytes_view
 
 G_kts: Final = bytes(
     (

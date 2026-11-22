@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -28,7 +27,6 @@ from pathlib import Path
 from typing import Final
 
 from fundrives.pan115._vendor.iter_collect import grouped_mapping
-
 
 _CACHE_DIR = Path("~/.p115client.cache.d").expanduser()
 _CACHE_DIR.mkdir(exist_ok=True)

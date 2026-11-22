@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "wish_info",
@@ -14,15 +13,15 @@ __doc__ = "这个模块提供了一些和 115 促销活动有关的函数"
 
 from collections.abc import AsyncIterator, Coroutine, Iterable, Iterator
 from os import PathLike
-from typing import overload, Any, Literal
+from typing import Any, Literal, overload
 
 from fundrives.pan115._vendor.iterutils import (
+    YieldFrom,
     run_gen_step,
     run_gen_step_iter,
-    YieldFrom,
 )
 
-from ..client import check_response, P115Client
+from ..client import P115Client, check_response
 from ..type import P115StrID
 
 

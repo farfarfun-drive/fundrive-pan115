@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = ["tinydb_initdb", "tinydb_update", "tinydb_update_event"]
 __doc__ = "这个模块提供了一些和更新小型数据库有关的函数"
@@ -7,7 +6,7 @@ __doc__ = "这个模块提供了一些和更新小型数据库有关的函数"
 from collections.abc import Callable, Coroutine
 from os import PathLike
 from time import time
-from typing import overload, Any, Literal
+from typing import Any, Literal, overload
 
 from fundrives.pan115._vendor.iterutils import foreach, run_gen_step
 from fundrives.pan115._vendor.sqlitetools import (
@@ -18,14 +17,11 @@ from fundrives.pan115._vendor.sqlitetools import (
     upsert_items,
 )
 
+from ..client import P115Client
 from .history import iter_history_once
 from .iterdir import iter_dirs, iter_life_behavior_once
 from .querydb import P115QueryDB
-from .updatedb import locked_gen_step, updatedb, event_normalize_attr, wrap_async
-
-
-from ..client import P115Client
-
+from .updatedb import event_normalize_attr, locked_gen_step, updatedb, wrap_async
 
 _init_ts = int(time())
 

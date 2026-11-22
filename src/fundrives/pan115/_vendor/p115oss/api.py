@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "upload_url",
@@ -16,13 +15,13 @@ from collections.abc import Buffer, Callable, Coroutine
 from datetime import datetime, timedelta
 from re import compile as re_compile
 from threading import Lock
-from typing import overload, Any, Final, Literal
+from typing import Any, Final, Literal, overload
 
-from fundrives.pan115._vendor.dicttools import iter_items, dict_update
-from fundrives.pan115._vendor.iterutils import run_gen_step
 from orjson import loads
-from fundrives.pan115._vendor.p115cipher import ecdh_aes_decrypt, make_upload_payload
 
+from fundrives.pan115._vendor.dicttools import dict_update, iter_items
+from fundrives.pan115._vendor.iterutils import run_gen_step
+from fundrives.pan115._vendor.p115cipher import ecdh_aes_decrypt, make_upload_payload
 
 CRE_UID_in_COOKIE_search: Final = re_compile(r"(?<=\bUID=)\w+").search
 _UPLOAD_TOKEN: Final[dict[str, str]] = {}

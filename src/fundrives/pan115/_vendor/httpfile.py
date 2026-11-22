@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -23,31 +22,33 @@ from collections.abc import (
 from functools import cached_property
 from inspect import isawaitable
 from io import (
+    DEFAULT_BUFFER_SIZE,
     BufferedReader,
     BytesIO,
     RawIOBase,
     TextIOWrapper,
     UnsupportedOperation,
-    DEFAULT_BUFFER_SIZE,
 )
 
 try:
     from shutil import COPY_BUFSIZE  # type: ignore
 except ImportError:
     COPY_BUFSIZE = 1 << 16
-from typing import cast, overload, Any, BinaryIO, Literal, Self
+from typing import Any, BinaryIO, Literal, Self, cast, overload
 from warnings import warn
+
+from yarl import URL
 
 from fundrives.pan115._vendor.argtools import argcount
 from fundrives.pan115._vendor.asynctools import ensure_async, run_async
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.filewrap import (
-    buffer_length,
-    bytes_iter_to_reader,
-    bytes_iter_to_async_reader,
-    to_bytes_view,
     AsyncBufferedReader,
     AsyncTextIOWrapper,
+    buffer_length,
+    bytes_iter_to_async_reader,
+    bytes_iter_to_reader,
+    to_bytes_view,
 )
 from fundrives.pan115._vendor.http_request import SupportsGeturl
 from fundrives.pan115._vendor.http_response import (
@@ -57,7 +58,6 @@ from fundrives.pan115._vendor.http_response import (
     get_total_length,
     is_range_request,
 )
-from yarl import URL
 
 
 def coalesce(*vals, base=None):
@@ -177,7 +177,7 @@ class HTTPFileReader[Response](RawIOBase, BinaryIO):
         while file:
             if hasattr(file, "closed"):
                 return file.closed
-            elif hasattr(file, "is_closed"):
+            if hasattr(file, "is_closed"):
                 closed = file.is_closed
                 if callable(closed):
                     closed = closed()
@@ -238,7 +238,7 @@ class HTTPFileReader[Response](RawIOBase, BinaryIO):
             file = get_file(response)
             if hasattr(file, "read"):
                 return file
-            elif isinstance(file, Iterator):
+            if isinstance(file, Iterator):
                 return bytes_iter_to_reader(file)
         else:
             if file := getattr(response, "file", None):
@@ -264,13 +264,13 @@ class HTTPFileReader[Response](RawIOBase, BinaryIO):
             for attr in ("stream", "body", "raw", "content"):
                 file = getattr(response, attr, None)
                 if file is not None:
-                    if hasattr(file, "read") and argcount(getattr(file, "read")):
+                    if hasattr(file, "read") and argcount(file.read):
                         return file
                     if callable(file):
                         file = file()
                     if isinstance(file, Buffer):
                         return BytesIO(file)
-                    elif isinstance(file, Iterator):
+                    if isinstance(file, Iterator):
                         return bytes_iter_to_reader(file)
         raise TypeError("can't determine how to `read`")
 
@@ -707,8 +707,7 @@ class HTTPFileReader[Response](RawIOBase, BinaryIO):
                 newline=newline,
                 line_buffering=line_buffering,
             )
-        else:
-            return buffer
+        return buffer
 
 
 class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
@@ -835,7 +834,7 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
         while file:
             if hasattr(file, "closed"):
                 return file.closed
-            elif hasattr(file, "is_closed"):
+            if hasattr(file, "is_closed"):
                 closed = file.is_closed
                 if callable(closed):
                     closed = closed()
@@ -898,7 +897,7 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
                 file = await file
             if hasattr(file, "aread") or hasattr(file, "read"):
                 return file
-            elif isinstance(file, (Iterator, AsyncIterator)):
+            if isinstance(file, (Iterator, AsyncIterator)):
                 return bytes_iter_to_async_reader(file, threaded=True)
         else:
             if file := getattr(response, "file", None):
@@ -952,7 +951,7 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
                             file = await file
                     if isinstance(file, Buffer):
                         return BytesIO(file)
-                    elif isinstance(file, (Iterator, AsyncIterator)):
+                    if isinstance(file, (Iterator, AsyncIterator)):
                         return bytes_iter_to_async_reader(file, threaded=True)
         raise TypeError("can't determine how to `read`")
 
@@ -1431,8 +1430,7 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
                 newline=newline,
                 line_buffering=line_buffering,
             )
-        else:
-            return buffer
+        return buffer
 
 
 class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
@@ -1718,7 +1716,7 @@ class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
             pos = 0
         if pos == old_pos:
             return pos
-        elif pos >= self.length:
+        if pos >= self.length:
             self.close()
             self._pos = pos
             return pos
@@ -2144,7 +2142,7 @@ class AsyncMultipartHTTPFileReader[Response](AsyncHTTPFileReader[Response]):
             pos = 0
         if pos == old_pos:
             return pos
-        elif pos >= self.length:
+        if pos >= self.length:
             await self.aclose()
             self._pos = pos
             return pos

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -16,7 +15,9 @@ from collections.abc import (
 )
 from os import PathLike
 from threading import Lock
-from typing import overload, Any, ClassVar, Literal, Self
+from typing import Any, ClassVar, Literal, Self, overload
+
+from yarl import URL
 
 from fundrives.pan115._vendor.dictattr import AttrDict
 from fundrives.pan115._vendor.dicttools import dict_key_to_lower_update
@@ -25,14 +26,13 @@ from fundrives.pan115._vendor.filewrap import Buffer, SupportsRead
 from fundrives.pan115._vendor.http_request import SupportsGeturl
 from fundrives.pan115._vendor.iterutils import run_gen_step
 from fundrives.pan115._vendor.p115pickcode import is_valid_pickcode
-from yarl import URL
 
-from ..client import check_response, P115Client
-from ..exception import throw, P115BusyOSError
+from ..client import P115Client, check_response
+from ..exception import P115BusyOSError, throw
+from ..tool import get_ancestors, get_attr, iterdir, normalize_attr_simple
 from ..type import P115URL
-from ..tool import get_attr, get_ancestors, iterdir, normalize_attr_simple
 from ..util import call_with_lock
-from .fs_base import IDOrPathType, P115PathBase, P115FileSystemBase, AncestorDict
+from .fs_base import AncestorDict, IDOrPathType, P115FileSystemBase, P115PathBase
 
 
 class P115Path(P115PathBase):

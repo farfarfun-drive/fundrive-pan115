@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 3, 1)
@@ -40,30 +39,29 @@ from array import array
 from asyncio import Lock as AsyncLock
 from codecs import getdecoder, getencoder
 from collections.abc import (
-    Awaitable,
     AsyncIterable,
     AsyncIterator,
+    Awaitable,
     Buffer,
     Callable,
     Iterable,
     Iterator,
 )
 from functools import cached_property
+from inspect import isasyncgen, isawaitable, isgenerator
 from io import BufferedIOBase, BufferedReader, RawIOBase, TextIOWrapper
-from inspect import isawaitable, isasyncgen, isgenerator
 from itertools import chain
 from re import compile as re_compile
 from threading import Lock
-from typing import cast, runtime_checkable, Any, BinaryIO, Final, Protocol, Self
+from typing import Any, BinaryIO, Final, Protocol, Self, cast, runtime_checkable
 
 from fundrives.pan115._vendor.asynctools import (
     async_chain,
-    ensure_async,
     ensure_aiter,
+    ensure_async,
     run_async,
 )
 from fundrives.pan115._vendor.property import funcproperty
-
 
 READ_BUFSIZE = 1 << 16
 CRE_NOT_UNIX_NEWLINES: Final = re_compile("\r\n|\r")
@@ -131,8 +129,7 @@ class AsyncBufferedReader(BufferedReader):
     async def __anext__(self, /):
         if line := await self.readline():
             return line
-        else:
-            raise StopAsyncIteration
+        raise StopAsyncIteration
 
     def __getattr__(self, attr, /):
         return getattr(self.raw, attr)
@@ -142,30 +139,30 @@ class AsyncBufferedReader(BufferedReader):
 
     @property
     def length(self, /) -> int:
-        return getattr(self.raw, "length")
+        return self.raw.length
 
     @cached_property
     def _close(self, /):
         try:
-            return getattr(self.raw, "aclose")
+            return self.raw.aclose
         except AttributeError:
-            return getattr(self.raw, "close")
+            return self.raw.close
 
     @cached_property
     def _flush(self, /):
-        return ensure_async(getattr(self.raw, "flush"), threaded=True)
+        return ensure_async(self.raw.flush, threaded=True)
 
     @cached_property
     def _read(self, /):
-        return ensure_async(getattr(self.raw, "read"), threaded=True)
+        return ensure_async(self.raw.read, threaded=True)
 
     @cached_property
     def _readinto(self, /):
-        return ensure_async(getattr(self.raw, "readinto"), threaded=True)
+        return ensure_async(self.raw.readinto, threaded=True)
 
     @cached_property
     def _readline(self, /):
-        return ensure_async(getattr(self.raw, "readline"), threaded=True)
+        return ensure_async(self.raw.readline, threaded=True)
 
     @cached_property
     def _seek(self, /):
@@ -247,7 +244,7 @@ class AsyncBufferedReader(BufferedReader):
                 buffer += data
                 length = buffer_length(data)
                 self._pos += length
-                if BUFSIZE == length:
+                if length == BUFSIZE:
                     buf_view[:] = data
                     if buf_pos != BUFSIZE:
                         buf_pos = self._buf_pos = self._buf_stop = BUFSIZE
@@ -294,7 +291,7 @@ class AsyncBufferedReader(BufferedReader):
             BUFSIZE = buffer_length(buf_view)
             length = buffer_length(data)
             self._pos += buffer_length(prev_data) + length
-            if BUFSIZE <= length:
+            if length >= BUFSIZE:
                 buf_view[:] = to_bytes_view(data)[-BUFSIZE:]
                 self._buf_pos = self._buf_stop = BUFSIZE
             else:
@@ -308,8 +305,7 @@ class AsyncBufferedReader(BufferedReader):
                     buf_view[-length:] = data
                     self._buf_pos = self._buf_stop = BUFSIZE
             return prev_data + data
-        else:
-            return prev_data
+        return prev_data
 
     async def readinto(self, buffer, /) -> int:  # type: ignore
         if self.closed:
@@ -338,8 +334,7 @@ class AsyncBufferedReader(BufferedReader):
                     size = buffer_length(data)
                     buffer[:size] = data
                     return size
-                else:
-                    return 0
+                return 0
 
         BUFSIZE = buffer_length(buf_view)
         buffer_view = to_bytes_view(buffer)
@@ -417,8 +412,7 @@ class AsyncBufferedReader(BufferedReader):
                     size = buffer_length(data)
                     buffer[:size] = data
                     return size
-                else:
-                    return 0
+                return 0
 
         BUFSIZE = buffer_length(buf_view)
         buffer_view = to_bytes_view(buffer)
@@ -436,7 +430,7 @@ class AsyncBufferedReader(BufferedReader):
             BUFSIZE = buffer_length(buf_view)
             buffer_pos += length
             self._pos += length
-            if BUFSIZE <= buffer_pos:
+            if buffer_pos >= BUFSIZE:
                 buf_view[:] = buffer_view[-BUFSIZE:]
                 self._buf_pos = self._buf_stop = BUFSIZE
             else:
@@ -513,7 +507,7 @@ class AsyncBufferedReader(BufferedReader):
         length = buffer_length(data)
         prev_data = buf_view[buf_pos:buf_stop].tobytes()
         self._pos += buffer_length(prev_data) + length
-        if BUFSIZE <= length:
+        if length >= BUFSIZE:
             buf_view[:] = to_bytes_view(data)[-BUFSIZE:]
             self._buf_pos = self._buf_stop = BUFSIZE
         else:
@@ -610,8 +604,7 @@ class AsyncTextIOWrapper(TextIOWrapper):
     async def __anext__(self, /):
         if line := await self.readline():
             return line
-        else:
-            raise StopAsyncIteration
+        raise StopAsyncIteration
 
     def __getattr__(self, attr, /):
         return getattr(self.buffer, attr)
@@ -619,9 +612,9 @@ class AsyncTextIOWrapper(TextIOWrapper):
     @cached_property
     def _close(self, /):
         try:
-            return getattr(self.buffer, "aclose")
+            return self.buffer.aclose
         except AttributeError:
-            return getattr(self.buffer, "close")
+            return self.buffer.close
 
     @cached_property
     def _flush(self, /):
@@ -633,11 +626,11 @@ class AsyncTextIOWrapper(TextIOWrapper):
 
     @cached_property
     def _seek(self, /):
-        return ensure_async(getattr(self.buffer, "seek"), threaded=True)
+        return ensure_async(self.buffer.seek, threaded=True)
 
     @cached_property
     def _tell(self, /):
-        return ensure_async(getattr(self.buffer, "tell"), threaded=True)
+        return ensure_async(self.buffer.tell, threaded=True)
 
     @cached_property
     def _truncate(self, /):
@@ -770,7 +763,7 @@ class AsyncTextIOWrapper(TextIOWrapper):
                     stop = min(stop, size)
                     self._text = text[stop:]
                     return text[:stop]
-                elif size <= len(text):
+                if size <= len(text):
                     self._text = text[size:]
                     return text[:size]
                 self._text = ""
@@ -781,25 +774,23 @@ class AsyncTextIOWrapper(TextIOWrapper):
                 return text + text_new
             self._text = text_new[stop:] + self._text
             return text + text_new[:stop]
-        else:
-            if text := self._text:
-                if stop := find_stop(text):
-                    self._text = text[stop:]
-                    return text[:stop]
-                self._text = ""
-            ls_part: list[str] = [text]
-            add_part = ls_part.append
-            while text := await self.read(READ_BUFSIZE):
-                if stop := find_stop(text):
-                    if stop == len(text):
-                        add_part(text)
-                    else:
-                        add_part(text[:stop])
-                        self._text = text[stop:] + self._text
-                    break
-                else:
+        if text := self._text:
+            if stop := find_stop(text):
+                self._text = text[stop:]
+                return text[:stop]
+            self._text = ""
+        ls_part: list[str] = [text]
+        add_part = ls_part.append
+        while text := await self.read(READ_BUFSIZE):
+            if stop := find_stop(text):
+                if stop == len(text):
                     add_part(text)
-            return "".join(ls_part)
+                else:
+                    add_part(text[:stop])
+                    self._text = text[stop:] + self._text
+                break
+            add_part(text)
+        return "".join(ls_part)
 
     async def readlines(self, hint=-1, /) -> list[str]:  # type: ignore
         if self.closed:
@@ -1066,7 +1057,7 @@ def bio_skip_iter(
     if not callable(callback):
         callback = None
     try:
-        seek = getattr(bio, "seek")
+        seek = bio.seek
         curpos = seek(0, 1)
         if size > 0:
             length = seek(size, 1) - curpos
@@ -1141,7 +1132,7 @@ async def bio_skip_async_iter(
     callback = ensure_async(callback) if callable(callback) else None
     length: int
     try:
-        seek = ensure_async(getattr(bio, "seek"), threaded=True)
+        seek = ensure_async(bio.seek, threaded=True)
         curpos = await seek(0, 1)
         if size > 0:
             length = (await seek(size, 1)) - curpos
@@ -1278,10 +1269,9 @@ def bytes_iter_skip(
             callback(min(l, size))
         if l == size:
             return it
-        elif l > size:
+        if l > size:
             return chain((m[size:],), it)
-        else:
-            size -= l
+        size -= l
     return iter(())
 
 
@@ -1303,10 +1293,9 @@ async def bytes_async_iter_skip(
             await callback(min(l, size))
         if l == size:
             return it
-        elif l > size:
+        if l > size:
             return async_chain((m[size:],), it)
-        else:
-            size -= l
+        size -= l
 
     async def make_iter():
         if False:
@@ -1333,7 +1322,7 @@ def bytes_iter_to_reader(
 
     def close():
         nonlocal at_end
-        getattr(it, "close")()
+        it.close()
         at_end = True
 
     def peek(n: int = 0, /) -> bytearray:
@@ -1389,10 +1378,9 @@ def bytes_iter_to_reader(
                             unconsumed += b[delta:]
                             pos += delta
                             return bufsize
-                        else:
-                            buf[n:m] = b
-                            pos += b_len
-                            n = m
+                        buf[n:m] = b
+                        pos += b_len
+                        n = m
             except StopIteration:
                 at_end = True
                 return n
@@ -1512,9 +1500,9 @@ def bytes_iter_to_async_reader(
     async def aclose():
         nonlocal at_end
         try:
-            method = getattr(it, "aclose")
+            method = it.aclose
         except AttributeError:
-            method = getattr(it, "close")
+            method = it.close
         ret = method()
         if isawaitable(ret):
             await ret
@@ -1573,10 +1561,9 @@ def bytes_iter_to_async_reader(
                             unconsumed += b[delta:]
                             pos += delta
                             return bufsize
-                        else:
-                            buf[n:m] = b
-                            pos += b_len
-                            n = m
+                        buf[n:m] = b
+                        pos += b_len
+                        n = m
             except (StopIteration, StopAsyncIteration):
                 at_end = True
                 return n
@@ -1904,7 +1891,7 @@ def bound_bytes_reader(
             nonlocal size
             if n == 0 or size <= 0:
                 return b""
-            elif n is None or n < 0:
+            if n is None or n < 0:
                 data = f_read(size)
                 size = 0
             else:
@@ -1942,7 +1929,7 @@ def bound_async_bytes_reader(
             nonlocal size
             if n == 0 or size <= 0:
                 return b""
-            elif n is None or n < 0:
+            if n is None or n < 0:
                 data = await f_read(size)
                 size = 0
             else:

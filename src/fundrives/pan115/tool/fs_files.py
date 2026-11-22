@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = ["fs_files", "fs_files_iter"]
 __doc__ = "这个模块利用 P115Client.fs_files 方法做了一些封装"
@@ -7,7 +6,7 @@ __doc__ = "这个模块利用 P115Client.fs_files 方法做了一些封装"
 from collections.abc import AsyncIterator, Callable, Coroutine, Iterator
 from itertools import cycle
 from os import PathLike
-from typing import overload, Any, Final, Literal
+from typing import Any, Final, Literal, overload
 from warnings import warn
 
 from fundrives.pan115._vendor.concurrenttools import iter_offset
@@ -15,9 +14,8 @@ from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.http_response import get_status_code, is_timeouterror
 from fundrives.pan115._vendor.iterutils import as_gen_step, run_gen_step
 
-from ..client import check_response, P115Client, P115OpenClient
-from ..exception import throw, P115Warning
-
+from ..client import P115Client, P115OpenClient, check_response
+from ..exception import P115Warning, throw
 
 # get_webapi_origin: Final = "https://webapi.115.com"
 get_webapi_origin: Final = cycle(

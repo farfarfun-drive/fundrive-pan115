@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "AsyncExecutor",
@@ -15,22 +14,22 @@ __all__ = [
     "iter_async",
 ]
 
+from _thread import start_new_thread
 from asyncio import (
+    AbstractEventLoop,
+    Semaphore,
+    Task,
     get_event_loop,
     get_running_loop,
     new_event_loop,
     run_coroutine_threadsafe,
     set_event_loop,
     wait,
-    AbstractEventLoop,
-    Semaphore,
-    Task,
 )
 from asyncio.tasks import all_tasks
 from collections.abc import AsyncIterable, Awaitable, Callable, Iterator
 from concurrent.futures._base import Executor, Future
 from contextvars import Context
-from _thread import start_new_thread
 from time import sleep
 
 from .basic import ensure_coroutine
@@ -239,8 +238,7 @@ def run_async[T](
         loop = get_loop()
     if loop.is_running():
         return run_coroutine_threadsafe(ensure_coroutine(o), loop)
-    else:
-        return loop.run_until_complete(ensure_coroutine(o))
+    return loop.run_until_complete(ensure_coroutine(o))
 
 
 def iter_async[T](

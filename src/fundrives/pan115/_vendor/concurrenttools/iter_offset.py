@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "iter_offset_threaded",
@@ -11,13 +10,19 @@ __all__ = [
 ]
 
 from asyncio import (
-    shield,
-    sleep as async_sleep,
-    wait_for,
-    TimeoutError as AsyncTimeoutError,
     Semaphore as AsyncSemaphore,
+)
+from asyncio import (
     Task,
     TaskGroup,
+    shield,
+    wait_for,
+)
+from asyncio import (
+    TimeoutError as AsyncTimeoutError,
+)
+from asyncio import (
+    sleep as async_sleep,
 )
 from collections import deque
 from collections.abc import AsyncIterator, Awaitable, Callable, Iterable, Iterator
@@ -25,7 +30,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import suppress
 from copy import copy
 from time import sleep, time
-from typing import cast, overload, Literal
+from typing import Literal, cast, overload
 
 from fundrives.pan115._vendor.asynctools import ensure_coroutine
 

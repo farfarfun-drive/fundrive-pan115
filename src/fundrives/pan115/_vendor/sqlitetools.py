@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 1, 3)
@@ -22,16 +21,25 @@ from collections.abc import Buffer, Callable, Iterable, Mapping, Sequence
 from contextlib import closing, contextmanager, suppress
 from enum import IntEnum
 from itertools import batched
-from os import fsdecode, PathLike
+from os import PathLike, fsdecode
 from os.path import isabs
 from platform import system
 from re import compile as re_compile
 from sqlite3 import connect as sqlite_connect
 from time import perf_counter
-from typing import cast, Any, Final, Literal, Self
+from typing import Any, Final, Literal, Self, cast
 from urllib.parse import urlencode
 
-from sqlparse import format as sql_format, split as sql_split
+try:
+    from sqlparse import format as sql_format
+    from sqlparse import split as sql_split
+except ImportError:
+
+    def sql_format(sql: str, /, **_kwargs) -> str:
+        return sql.strip()
+
+    def sql_split(sql: str, /) -> list[str]:
+        return [s.strip() for s in sql.split(";") if s.strip()]
 
 
 CRE_COLNAME_sub: Final = re_compile(r" \[[^]]+\]$").sub
@@ -43,7 +51,7 @@ if system() == "Windows":
 
 class MappingAsDict(UserDict, dict):  # type: ignore
     def __init__(self, data: Mapping, /):
-        setattr(self, "data", data)
+        self.data = data
 
 
 class FetchType(IntEnum):
@@ -128,9 +136,9 @@ def bind_row_factory(
                         if not isinstance(record, (str, Buffer)):
                             if isinstance(record, Sequence):
                                 return record[0]
-                            elif isinstance(record, Mapping):
+                            if isinstance(record, Mapping):
                                 return record[next(iter(record))]
-                            elif isinstance(record, Iterable):
+                            if isinstance(record, Iterable):
                                 return next(iter(record))
                         return record
                 case FetchType.dict:
@@ -149,7 +157,7 @@ def bind_row_factory(
                     row_factory = None
     if row_factory is not None:
         if hasattr(cursor, "row_factory"):
-            setattr(cursor, "row_factory", row_factory)
+            cursor.row_factory = row_factory
         else:
 
             def binder(row_factory, cursor, /):
@@ -181,8 +189,7 @@ def enclose(
     if isinstance(encloser, tuple):
         l, r = encloser
         return f"{l}{name}{r}"
-    else:
-        return f"{encloser}{name.replace(encloser, encloser * 2)}{encloser}"
+    return f"{encloser}{name.replace(encloser, encloser * 2)}{encloser}"
 
 
 def connect(
@@ -462,7 +469,7 @@ def batch_execute(
                             flush=True,
                         )
                 finally:
-                    print(f"\r\x1b[K", end="", flush=True)
+                    print("\r\x1b[K", end="", flush=True)
 
             gen = gen_progress()
             next(gen)

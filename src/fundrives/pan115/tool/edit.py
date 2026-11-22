@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "update_abstract",
@@ -46,22 +45,24 @@ from contextlib import suppress
 from functools import partial
 from itertools import batched
 from os import PathLike
-from typing import cast, overload, Any, Literal
 from types import EllipsisType
+from typing import Any, Literal, cast, overload
 
 from fundrives.pan115._vendor.concurrenttools import conmap
 from fundrives.pan115._vendor.iterutils import (
+    as_gen_step,
     chunked,
     collect,
     foreach,
-    map as do_map,
     run_gen_step,
-    as_gen_step,
     through,
+)
+from fundrives.pan115._vendor.iterutils import (
+    map as do_map,
 )
 from fundrives.pan115._vendor.p115pickcode import to_id
 
-from ..client import check_response, P115Client, P115OpenClient
+from ..client import P115Client, P115OpenClient, check_response
 from ..exception import P115BusyOSError
 from ..type import P115URL
 

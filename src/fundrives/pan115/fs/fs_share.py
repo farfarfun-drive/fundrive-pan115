@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -15,15 +14,15 @@ from collections.abc import (
 from datetime import datetime
 from functools import cached_property
 from os import PathLike
-from typing import overload, Any, ClassVar, Literal
+from typing import Any, ClassVar, Literal, overload
 
 from fundrives.pan115._vendor.iterutils import run_gen_step
 
-from ..client import check_response, P115Client
+from ..client import P115Client, check_response
+from ..tool import normalize_attr_simple, share_iterdir
 from ..type import P115URL
-from ..tool import share_iterdir, normalize_attr_simple
 from ..util import share_extract_payload
-from .fs_base import IDOrPathType, P115PathBase, P115FileSystemBase
+from .fs_base import IDOrPathType, P115FileSystemBase, P115PathBase
 
 
 class P115SharePath(P115PathBase):

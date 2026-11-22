@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 2)
@@ -8,11 +7,11 @@ __all__ = ["translate_iter", "translate"]
 from collections.abc import Iterator
 from fnmatch import translate as wildcard_translate
 from functools import partial
-from re import compile as re_compile, escape as re_escape
+from re import compile as re_compile
+from re import escape as re_escape
 from typing import Final
 
 from .posixpatht import splits
-
 
 REFIND_BRACKET: Final = re_compile(r"\[[^]]+\]").finditer
 RESUB_DOT: Final = re_compile(r"((?:^|(?<=[^\\]))(?s:\\.)*)\.").sub
@@ -27,7 +26,7 @@ def _glob_is_pat(part: str, /) -> bool:
         for _, c in it:
             if c in ("?", "*"):
                 return True
-            elif c == "[":
+            if c == "[":
                 _, c2 = next(it)
                 if c2 == "]":
                     continue

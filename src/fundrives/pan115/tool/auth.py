@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = ["open_deauth", "open_app_check", "open_app_name"]
 __doc__ = "这个模块提供了一些和账号状况有关的函数"
 
 from collections.abc import Callable, Coroutine
 from os import PathLike
-from typing import overload, Any, Literal
+from typing import Any, Literal, overload
 
 from fundrives.pan115._vendor.iterutils import run_gen_step
 
-from ..client import check_response, P115Client, P115OpenClient
+from ..client import P115Client, P115OpenClient, check_response
 
 
 @overload

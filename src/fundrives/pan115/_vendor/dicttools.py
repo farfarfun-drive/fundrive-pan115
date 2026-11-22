@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -66,10 +65,9 @@ from collections.abc import (
 from functools import partial
 from itertools import chain
 from operator import methodcaller
-from typing import cast, overload, Any, Protocol, Self
+from typing import Any, Protocol, Self, cast, overload
 
-from .undefined import undefined, Undefined
-
+from .undefined import Undefined, undefined
 
 _null = object()
 
@@ -89,8 +87,7 @@ def _hash_eq(x, y, hash_of_x=undefined, /) -> bool:
     try:
         if hash_of_x is undefined:
             return x is y or hash(x) == hash(y)
-        else:
-            return x is y or hash_of_x == hash(y)
+        return x is y or hash_of_x == hash(y)
     except Exception:
         return False
 
@@ -275,9 +272,8 @@ def pop[K, V, V2](
         if default is undefined:
             raise KeyError(k)
         return cast(V2, default)
-    else:
-        del m[cast(K, k)]
-        return cast(V, v)
+    del m[cast(K, k)]
+    return cast(V, v)
 
 
 @overload
@@ -712,10 +708,9 @@ def dict_map[K, V, K2, V2](
         if value is None:
             return dict(m)
         return {k: value(v) for k, v in iter_items(m)}
-    elif value is None:
+    if value is None:
         return {key(k): v for k, v in iter_items(m)}
-    else:
-        return {key(k): value(v) for k, v in iter_items(m)}
+    return {key(k): value(v) for k, v in iter_items(m)}
 
 
 @overload
@@ -775,10 +770,9 @@ def iter_items_map[K, V, K2, V2](
         if value is None:
             return iter_items(m)
         return ((k, value(v)) for k, v in iter_items(m))
-    elif value is None:
+    if value is None:
         return ((key(k), v) for k, v in iter_items(m))
-    else:
-        return ((key(k), value(v)) for k, v in iter_items(m))
+    return ((key(k), value(v)) for k, v in iter_items(m))
 
 
 @overload
@@ -928,8 +922,7 @@ class KeyedDict[K, V, K2](dict[K2, V]):
         k = type(self).__key__(key)
         if default is undefined:
             return super().pop(k)
-        else:
-            return super().pop(k, default)
+        return super().pop(k, default)
 
     def setdefault(self, key: K2, /, default: V) -> V:
         return super().setdefault(type(self).__key__(key), default)

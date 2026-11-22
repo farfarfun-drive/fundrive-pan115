@@ -57,6 +57,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "src" / "fundrives" / "pan115"
 
 ELIMINATED_DISTS = {
+    "brotli",
     "cachedict",
     "ed2k",
     "errno2",
@@ -92,8 +93,11 @@ ELIMINATED_DISTS = {
     "python-undefined",
     "socket-keepalive",
     "sqlitetools",
+    "sqlparse",
     "urllib3-future",
     "urllib3_future_request",
+    "wcwidth",
+    "zstandard",
 }
 
 ELIMINATED_MODULES = {

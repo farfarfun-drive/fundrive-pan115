@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 """Tools for making decorators"""
 
@@ -10,7 +9,7 @@ __all__ = ["decorated", "optional", "currying", "partialize"]
 from collections.abc import Callable
 from functools import update_wrapper as _update_wrapper
 from inspect import signature
-from typing import cast, overload, Any, Concatenate
+from typing import Any, Concatenate, cast, overload
 
 from fundrives.pan115._vendor.undefined import undefined
 
@@ -126,9 +125,11 @@ def optional[**Args, R](
     """
     nargs = 0
     for param in signature(f).parameters.values():
-        if param.kind is param.POSITIONAL_ONLY:
-            nargs += 1
-        elif param.kind is param.POSITIONAL_OR_KEYWORD and param.default is param.empty:
+        if (
+            param.kind is param.POSITIONAL_ONLY
+            or param.kind is param.POSITIONAL_OR_KEYWORD
+            and param.default is param.empty
+        ):
             nargs += 1
         if nargs >= 2:
             break

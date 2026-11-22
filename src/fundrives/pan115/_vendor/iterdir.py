@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 10)
@@ -17,28 +16,29 @@ from collections.abc import (
 from datetime import datetime
 from inspect import isasyncgenfunction, isawaitable
 from os import (
+    DirEntry as _DirEntry,
+)
+from os import (
+    PathLike,
     fspath,
     lstat,
     scandir,
     stat,
     stat_result,
-    DirEntry as _DirEntry,
-    PathLike,
 )
 from os.path import (
     abspath,
-    commonpath,
     basename,
-    isfile,
+    commonpath,
     isdir,
+    isfile,
     islink,
     realpath,
 )
-from typing import cast, overload, Any, Final, Literal, Never
+from typing import Any, Final, Literal, Never, cast, overload
 
 from fundrives.pan115._vendor.asynctools import ensure_aiter
 from fundrives.pan115._vendor.texttools import format_mode, format_size
-
 
 STAT_FIELDS: Final = (
     "mode",
@@ -99,22 +99,19 @@ class DirEntry[AnyStr: (bytes, str)](metaclass=DirEntryMeta):
     def is_dir(self, /, *, follow_symlinks: bool = True) -> bool:
         if follow_symlinks:
             return isdir(self.path)
-        else:
-            return not islink(self.path) and isdir(self.path)
+        return not islink(self.path) and isdir(self.path)
 
     def is_file(self, /, *, follow_symlinks: bool = True) -> bool:
         if follow_symlinks:
             return isfile(self.path)
-        else:
-            return islink(self.path) or isfile(self.path)
+        return islink(self.path) or isfile(self.path)
 
     is_symlink = islink
 
     def stat(self, /, *, follow_symlinks: bool = True) -> stat_result:
         if follow_symlinks:
             return stat(self.path)
-        else:
-            return lstat(self.path)
+        return lstat(self.path)
 
     def stat_dict(
         self,
@@ -126,8 +123,7 @@ class DirEntry[AnyStr: (bytes, str)](metaclass=DirEntryMeta):
         stat = self.stat(follow_symlinks=follow_symlinks)
         if with_st:
             return dict(zip(STAT_ST_FIELDS, (getattr(stat, a) for a in STAT_ST_FIELDS)))
-        else:
-            return dict(zip(STAT_FIELDS, stat))
+        return dict(zip(STAT_FIELDS, stat))
 
     def stat_info(self, /, *, follow_symlinks: bool = True) -> dict[str, Any]:
         stat_info: dict[str, Any] = self.stat_dict(follow_symlinks=follow_symlinks)
@@ -450,39 +446,36 @@ def iterdir_generic[P](
                 predicate=predicate,
                 onerror=onerror,
             )
-        else:
-            return _iterdir_bfs(
-                top,
-                iterdir=iterdir,  # type: ignore
-                min_depth=min_depth,
-                max_depth=max_depth,
-                isdir=isdir,  # type: ignore
-                predicate=predicate,
-                onerror=onerror,
-            )
-    else:
-        if async_:
-            return _iterdir_dfs_async(
-                top,
-                iterdir=iterdir,
-                topdown=topdown,
-                min_depth=min_depth,
-                max_depth=max_depth,
-                isdir=isdir,
-                predicate=predicate,
-                onerror=onerror,
-            )
-        else:
-            return _iterdir_dfs(
-                top,
-                iterdir=iterdir,  # type: ignore
-                topdown=topdown,
-                min_depth=min_depth,
-                max_depth=max_depth,
-                isdir=isdir,  # type: ignore
-                predicate=predicate,
-                onerror=onerror,
-            )
+        return _iterdir_bfs(
+            top,
+            iterdir=iterdir,  # type: ignore
+            min_depth=min_depth,
+            max_depth=max_depth,
+            isdir=isdir,  # type: ignore
+            predicate=predicate,
+            onerror=onerror,
+        )
+    if async_:
+        return _iterdir_dfs_async(
+            top,
+            iterdir=iterdir,
+            topdown=topdown,
+            min_depth=min_depth,
+            max_depth=max_depth,
+            isdir=isdir,
+            predicate=predicate,
+            onerror=onerror,
+        )
+    return _iterdir_dfs(
+        top,
+        iterdir=iterdir,  # type: ignore
+        topdown=topdown,
+        min_depth=min_depth,
+        max_depth=max_depth,
+        isdir=isdir,  # type: ignore
+        predicate=predicate,
+        onerror=onerror,
+    )
 
 
 def _walk_bfs[P](
@@ -742,36 +735,33 @@ def walk_generic[P](
                 isdir=isdir,
                 onerror=onerror,
             )
-        else:
-            return _walk_bfs(
-                top,
-                iterdir=iterdir,  # type: ignore
-                min_depth=min_depth,
-                max_depth=max_depth,
-                isdir=isdir,  # type: ignore
-                onerror=onerror,
-            )
-    else:
-        if async_:
-            return _walk_dfs_async(
-                top,
-                iterdir=iterdir,
-                topdown=topdown,
-                min_depth=min_depth,
-                max_depth=max_depth,
-                isdir=isdir,
-                onerror=onerror,
-            )
-        else:
-            return _walk_dfs(
-                top,
-                iterdir=iterdir,  # type: ignore
-                topdown=topdown,
-                min_depth=min_depth,
-                max_depth=max_depth,
-                isdir=isdir,  # type: ignore
-                onerror=onerror,
-            )
+        return _walk_bfs(
+            top,
+            iterdir=iterdir,  # type: ignore
+            min_depth=min_depth,
+            max_depth=max_depth,
+            isdir=isdir,  # type: ignore
+            onerror=onerror,
+        )
+    if async_:
+        return _walk_dfs_async(
+            top,
+            iterdir=iterdir,
+            topdown=topdown,
+            min_depth=min_depth,
+            max_depth=max_depth,
+            isdir=isdir,
+            onerror=onerror,
+        )
+    return _walk_dfs(
+        top,
+        iterdir=iterdir,  # type: ignore
+        topdown=topdown,
+        min_depth=min_depth,
+        max_depth=max_depth,
+        isdir=isdir,  # type: ignore
+        onerror=onerror,
+    )
 
 
 @overload
@@ -836,7 +826,7 @@ def iterdir[AnyStr: (bytes, str)](
         realtop = realpath(top)
         isdir = lambda e, /: (
             e.is_dir(follow_symlinks=follow_symlinks)
-            and commonpath((t := (realtop, realpath(e)))) not in t
+            and commonpath(t := (realtop, realpath(e))) not in t
         )
     else:
         isdir = lambda e, /: e.is_dir(follow_symlinks=follow_symlinks)
@@ -902,7 +892,7 @@ def walk[AnyStr: (bytes, str)](
         realtop = realpath(top)
         isdir = lambda e, /: (
             e.is_dir(follow_symlinks=follow_symlinks)
-            and commonpath((t := (realtop, realpath(e)))) not in t
+            and commonpath(t := (realtop, realpath(e))) not in t
         )
     else:
         isdir = lambda e, /: e.is_dir(follow_symlinks=follow_symlinks)

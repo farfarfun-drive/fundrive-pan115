@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 from __future__ import annotations
 
@@ -7,7 +6,7 @@ __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 4)
 __all__ = ["Undefined", "undefined", "is_undefined"]
 
-from typing import final, Self
+from typing import Self, final
 
 try:
     from typing import TypeIs

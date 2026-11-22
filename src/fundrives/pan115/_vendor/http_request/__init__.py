@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 1, 7)
@@ -36,38 +35,41 @@ from mimetypes import guess_type
 from numbers import Integral, Real
 from os import PathLike
 from os.path import basename
-from re import compile as re_compile, Pattern
+from re import Pattern
+from re import compile as re_compile
 from string import punctuation
 from typing import (
-    cast,
-    overload,
-    runtime_checkable,
     Any,
     Final,
     Literal,
     Protocol,
     TypedDict,
+    cast,
+    overload,
+    runtime_checkable,
 )
 from urllib.parse import quote, urlparse, urlunparse
 from uuid import uuid4
 
+from orjson import dumps as json_dumps
+from yarl import URL
+
 from fundrives.pan115._vendor.asynctools import async_map
 from fundrives.pan115._vendor.dicttools import dict_map, iter_items
 from fundrives.pan115._vendor.ensure import (
-    ensure_bytes as ensure_bytes_,
     ensure_buffer,
     ensure_str,
 )
+from fundrives.pan115._vendor.ensure import (
+    ensure_bytes as ensure_bytes_,
+)
 from fundrives.pan115._vendor.filewrap import (
-    bio_chunk_iter,
-    bio_chunk_async_iter,
     SupportsRead,
+    bio_chunk_async_iter,
+    bio_chunk_iter,
 )
 from fundrives.pan115._vendor.http_response import get_charset, get_mimetype
-from orjson import dumps as json_dumps
 from fundrives.pan115._vendor.texttools import text_to_dict
-from yarl import URL
-
 
 type string = Buffer | str | UserString
 
@@ -156,9 +158,9 @@ def urlencode(
 ) -> str:
     if isinstance(payload, str):
         return payload
-    elif isinstance(payload, UserString):
+    if isinstance(payload, UserString):
         return str(payload)
-    elif isinstance(payload, Buffer):
+    if isinstance(payload, Buffer):
         return str(payload, encoding, errors)
 
     def encode_iter(payload: Iterable[tuple[Any, Any]], /) -> Iterator[str]:
@@ -461,13 +463,13 @@ def encode_multipart_data_async(
 def json_default(o, /):
     if isinstance(o, Mapping):
         return dict(o)
-    elif isinstance(o, Buffer):
+    if isinstance(o, Buffer):
         return ensure_str(o)
-    elif isinstance(o, UserString):
+    if isinstance(o, UserString):
         return str(o)
-    elif isinstance(o, Integral):
+    if isinstance(o, Integral):
         return int(o)
-    elif isinstance(o, (Real, Fraction, Decimal)):
+    if isinstance(o, (Real, Fraction, Decimal)):
         try:
             return float(o)
         except Exception:

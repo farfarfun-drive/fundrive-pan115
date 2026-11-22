@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __author__ = "ChenyangGao <https://chenyanggao.github.io>"
 __version__ = (0, 0, 6)
@@ -44,7 +43,7 @@ __all__ = [
 
 from collections.abc import Buffer
 from string import ascii_lowercase, digits
-from typing import cast, Final, Literal, SupportsInt
+from typing import Final, Literal, SupportsInt, cast
 
 try:
     from bitarray import bitarray
@@ -177,7 +176,7 @@ def int_from_str(
     """
     if isinstance(base, int):
         return int(s, base)
-    elif s == "":
+    if s == "":
         return 0
     posvalseq = base
     base = len(base)
@@ -303,10 +302,9 @@ def cut_bits(x: int, /, offset: int = 0, length: int = 1) -> int:
         return 0
     if length == 1:
         return (x >> offset) & 1
-    elif length <= 0:
+    if length <= 0:
         return x >> offset
-    else:
-        return (x >> offset) & ((1 << length) - 1)
+    return (x >> offset) & ((1 << length) - 1)
 
 
 def is_pow2(n: int, /) -> bool:
@@ -438,14 +436,14 @@ def try_parse_int(o, /, check_types: None | type | tuple[type, ...] = str):
     if check_types is None or isinstance(o, check_types):
         if isinstance(o, SupportsInt):
             return int(o)
-        elif isinstance(o, str) and o:
+        if isinstance(o, str) and o:
             if o == "true":
                 return True
-            elif o == "false":
+            if o == "false":
                 return False
-            elif o == "0":
+            if o == "0":
                 return 0
-            elif not (o[0] == "0" or o.lstrip(digits)):
+            if not (o[0] == "0" or o.lstrip(digits)):
                 return int(o)
         elif isinstance(o, Buffer):
             return int_from_bytes(o)

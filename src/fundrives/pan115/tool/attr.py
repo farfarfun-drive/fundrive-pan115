@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "normalize_attr",
@@ -41,30 +40,29 @@ from functools import partial
 from itertools import cycle, dropwhile
 from os import PathLike
 from types import EllipsisType
-from typing import cast, overload, Any, Final, Literal
+from typing import Any, Final, Literal, cast, overload
 
 from fundrives.pan115._vendor.dictattr import AttrDict
 from fundrives.pan115._vendor.dicttools import get_first
 from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.integer_tool import try_parse_int
 from fundrives.pan115._vendor.iterutils import as_gen_step, run_gen_step, with_iter_next
-from fundrives.pan115._vendor.p115pickcode import to_id, get_stable_point
+from fundrives.pan115._vendor.p115pickcode import get_stable_point, to_id
 from fundrives.pan115._vendor.posixpatht import path_is_dir_form, splitext, splits
 
-from ..client import check_response, P115Client, P115OpenClient
-from ..const import CLASS_TO_TYPE, SUFFIX_TO_TYPE, ID_TO_DIRNODE_CACHE
+from ..client import P115Client, P115OpenClient, check_response
+from ..const import CLASS_TO_TYPE, ID_TO_DIRNODE_CACHE, SUFFIX_TO_TYPE
 from ..exception import throw
 from ..type import P115ID, P115URL
 from ..util import (
+    is_valid_id,
+    is_valid_name,
+    is_valid_pickcode,
+    is_valid_sha1,
     posix_escape_name,
     share_extract_payload,
     unescape_115_charref,
-    is_valid_id,
-    is_valid_sha1,
-    is_valid_name,
-    is_valid_pickcode,
 )
-
 
 _get_webapi_origin_fs_info: Final = cycle(
     (
@@ -248,9 +246,9 @@ def normalize_attr_web[D: dict[str, Any]](
         attr["type"] = 0
     elif info.get("iv") or "vdi" in info:
         attr["type"] = 4
-    elif type_ := CLASS_TO_TYPE.get(attr.get("class", "")):
-        attr["type"] = type_
-    elif type_ := SUFFIX_TO_TYPE.get(splitext(attr["name"])[1].lower()):
+    elif (type_ := CLASS_TO_TYPE.get(attr.get("class", ""))) or (
+        type_ := SUFFIX_TO_TYPE.get(splitext(attr["name"])[1].lower())
+    ):
         attr["type"] = type_
     else:
         attr["type"] = 99
@@ -628,10 +626,9 @@ def normalize_attr[D: dict[str, Any]](
         return call(
             info, simple=simple, keep_raw=keep_raw, default=default, dict_cls=AttrDict
         )
-    else:
-        return call(
-            info, simple=simple, keep_raw=keep_raw, default=default, dict_cls=dict_cls
-        )
+    return call(
+        info, simple=simple, keep_raw=keep_raw, default=default, dict_cls=dict_cls
+    )
 
 
 @overload
@@ -1020,7 +1017,7 @@ def get_ancestors(
         ancestors: list[dict] = [{"id": 0, "parent_id": 0, "name": ""}]
         if not cid:
             return ancestors
-        elif not refresh and id_to_dirnode is not ... and cid in id_to_dirnode:
+        if not refresh and id_to_dirnode is not ... and cid in id_to_dirnode:
             parts: list[dict] = []
             add_part = parts.append
             with suppress(KeyError):
@@ -1390,7 +1387,7 @@ def get_id(
                 size = attr["size"]
     if pickcode:
         return to_id(pickcode)
-    elif sha1:
+    if sha1:
         return get_id_to_sha1(
             client,
             sha1=sha1,
@@ -1400,7 +1397,7 @@ def get_id(
             async_=async_,
             **request_kwargs,
         )
-    elif name:
+    if name:
         return get_id_to_name(
             client,
             name=name,
@@ -1411,7 +1408,7 @@ def get_id(
             async_=async_,
             **request_kwargs,
         )
-    elif path:
+    if path:
         return get_id_to_path(
             client,
             path=path,
@@ -1425,50 +1422,49 @@ def get_id(
             async_=async_,
             **request_kwargs,
         )
-    else:
-        if isinstance(value, (int, str)):
-            if is_valid_id(value):
-                id = int(value)
-                if id or not ensure_file:
-                    return id
-                value = str(id)
-            value = cast(str, value)
-            if is_valid_pickcode(value):
-                return to_id(value)
-            elif ensure_file is not False and is_valid_sha1(value):
-                return get_id_to_sha1(
-                    client,
-                    sha1=value,
-                    size=size,
-                    cid=cid,
-                    app=app,
-                    async_=async_,
-                    **request_kwargs,
-                )
-            elif is_valid_name(value):
-                return get_id_to_name(
-                    client,
-                    name=value,
-                    size=size,
-                    cid=cid,
-                    ensure_file=ensure_file,
-                    app=app,
-                    async_=async_,
-                    **request_kwargs,
-                )
-        return get_id_to_path(
-            client,
-            path=value,
-            cid=cid,
-            ensure_file=ensure_file,
-            is_posixpath=is_posixpath,
-            refresh=refresh,
-            id_to_dirnode=id_to_dirnode,
-            app=app,
-            dont_use_getid=dont_use_getid,
-            async_=async_,
-            **request_kwargs,
-        )
+    if isinstance(value, (int, str)):
+        if is_valid_id(value):
+            id = int(value)
+            if id or not ensure_file:
+                return id
+            value = str(id)
+        value = cast(str, value)
+        if is_valid_pickcode(value):
+            return to_id(value)
+        if ensure_file is not False and is_valid_sha1(value):
+            return get_id_to_sha1(
+                client,
+                sha1=value,
+                size=size,
+                cid=cid,
+                app=app,
+                async_=async_,
+                **request_kwargs,
+            )
+        if is_valid_name(value):
+            return get_id_to_name(
+                client,
+                name=value,
+                size=size,
+                cid=cid,
+                ensure_file=ensure_file,
+                app=app,
+                async_=async_,
+                **request_kwargs,
+            )
+    return get_id_to_path(
+        client,
+        path=value,
+        cid=cid,
+        ensure_file=ensure_file,
+        is_posixpath=is_posixpath,
+        refresh=refresh,
+        id_to_dirnode=id_to_dirnode,
+        app=app,
+        dont_use_getid=dont_use_getid,
+        async_=async_,
+        **request_kwargs,
+    )
 
 
 @overload
@@ -2004,7 +2000,7 @@ def share_get_id(
             async_=async_,
             **request_kwargs,
         )
-    elif path:
+    if path:
         return share_get_id_to_path(
             client,
             path=path,
@@ -2018,39 +2014,38 @@ def share_get_id(
             async_=async_,
             **request_kwargs,
         )
-    else:
-        if isinstance(value, (int, str)):
-            if is_valid_id(value):
-                id = int(value)
-                if id or not ensure_file:
-                    return id
-                value = str(id)
-            value = cast(str, value)
-            if is_valid_name(value):
-                return share_get_id_to_name(
-                    client,
-                    name=value,
-                    share_code=share_code,
-                    receive_code=receive_code,
-                    size=size,
-                    cid=cid,
-                    ensure_file=ensure_file,
-                    async_=async_,
-                    **request_kwargs,
-                )
-        return share_get_id_to_path(
-            client,
-            path=value,
-            share_code=share_code,
-            receive_code=receive_code,
-            cid=cid,
-            ensure_file=ensure_file,
-            is_posixpath=is_posixpath,
-            refresh=refresh,
-            id_to_dirnode=id_to_dirnode,
-            async_=async_,
-            **request_kwargs,
-        )
+    if isinstance(value, (int, str)):
+        if is_valid_id(value):
+            id = int(value)
+            if id or not ensure_file:
+                return id
+            value = str(id)
+        value = cast(str, value)
+        if is_valid_name(value):
+            return share_get_id_to_name(
+                client,
+                name=value,
+                share_code=share_code,
+                receive_code=receive_code,
+                size=size,
+                cid=cid,
+                ensure_file=ensure_file,
+                async_=async_,
+                **request_kwargs,
+            )
+    return share_get_id_to_path(
+        client,
+        path=value,
+        share_code=share_code,
+        receive_code=receive_code,
+        cid=cid,
+        ensure_file=ensure_file,
+        is_posixpath=is_posixpath,
+        refresh=refresh,
+        id_to_dirnode=id_to_dirnode,
+        async_=async_,
+        **request_kwargs,
+    )
 
 
 @overload
@@ -2496,20 +2491,19 @@ def get_dir_count(
             return i
 
         return count()
-    else:
-        return sum(
-            1
-            for _ in iter_download_nodes(
-                client,
-                cid,
-                files=False,
-                get_raw=True,
-                id_to_dirnode=id_to_dirnode,
-                max_workers=None,
-                app=app,
-                **request_kwargs,
-            )
+    return sum(
+        1
+        for _ in iter_download_nodes(
+            client,
+            cid,
+            files=False,
+            get_raw=True,
+            id_to_dirnode=id_to_dirnode,
+            max_workers=None,
+            app=app,
+            **request_kwargs,
         )
+    )
 
 
 @overload

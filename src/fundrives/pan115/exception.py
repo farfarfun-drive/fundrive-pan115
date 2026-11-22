@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "P115Error",
@@ -28,24 +27,12 @@ __all__ = [
 ]
 __doc__ = "各种异常类和相关的帮助函数"
 
-import warnings
-
-from itertools import count
 from collections.abc import Mapping
 from functools import cached_property
 from typing import Never
 
-from fundrives.pan115._vendor.errno2 import errno, errno2error as _errno2error
-
-
-warnings.filterwarnings("always", category=UserWarning)
-setattr(
-    warnings,
-    "formatwarning",
-    lambda message, category, filename, lineno, line=None, _getid=count(1).__next__: (
-        f"\r\x1b[K\x1b[1;31;43m{category.__qualname__}\x1b[0m(\x1b[32m{_getid()}\x1b[0m) @ \x1b[3;4;34m{filename}\x1b[0m:\x1b[36m{lineno}\x1b[0m \x1b[5;31m➜\x1b[0m \x1b[1m{message}\x1b[0m\n"
-    ),
-)
+from fundrives.pan115._vendor.errno2 import errno
+from fundrives.pan115._vendor.errno2 import errno2error as _errno2error
 
 
 class P115Error(Exception):

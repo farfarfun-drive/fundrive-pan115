@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from __future__ import annotations
 
@@ -18,7 +17,7 @@ __doc__ = "这个模块提供了一些和 cookies 池有关的函数"
 from asyncio import Lock as AsyncLock
 from collections.abc import Callable, Iterable, Mapping
 from functools import partial, total_ordering, update_wrapper
-from heapq import heappop, heappush, heapify
+from heapq import heapify, heappop, heappush
 from itertools import cycle, repeat
 from math import inf, isinf
 from os import PathLike
@@ -28,8 +27,8 @@ from time import time
 from fundrives.pan115._vendor.http_response import get_status_code, is_timeouterror
 from fundrives.pan115._vendor.iterutils import run_gen_step
 
-from ..client import check_response, P115Client
-from ..exception import P115OSError, P115AuthenticationError, P115LoginError
+from ..client import P115Client, check_response
+from ..exception import P115AuthenticationError, P115LoginError, P115OSError
 
 
 @total_ordering
@@ -39,10 +38,9 @@ class ComparedWithID[T]:
     def __new__(cls, value: T | ComparedWithID[T], /):
         if isinstance(value, ComparedWithID):
             return value
-        else:
-            self = super().__new__(cls)
-            self.value = value
-            return self
+        self = super().__new__(cls)
+        self.value = value
+        return self
 
     def __eq__(self, other, /) -> bool:
         if isinstance(other, ComparedWithID):
@@ -128,7 +126,7 @@ def generate_cookies_factory(
         app = tuple(app)
         if client.login_app() in app:
             raise ValueError(f"same login device (app={app!r}) will cause conflicts")
-        elif not app:
+        if not app:
             app = "tv" if client.login_ssoent == "R2" else "alipaymini"
             get_app = repeat(app).__next__
         else:
@@ -240,7 +238,7 @@ def make_pool[T](
         return run_gen_step(call, async_)
 
     if not lock:
-        setattr(get_value, "heap", heap_)
+        get_value.heap = heap_
         return get_value
     lock_sync = Lock()
     lock_async = AsyncLock()
@@ -253,15 +251,14 @@ def make_pool[T](
                     return await get_value(async_=True)
 
             return async_locked_get_value
-        else:
 
-            def locked_get_value():
-                with lock_sync:
-                    return get_value()
+        def locked_get_value():
+            with lock_sync:
+                return get_value()
 
-            return locked_get_value
+        return locked_get_value
 
-    setattr(locked_get_value, "heap", heap_)
+    locked_get_value.heap = heap_
     return locked_get_value
 
 

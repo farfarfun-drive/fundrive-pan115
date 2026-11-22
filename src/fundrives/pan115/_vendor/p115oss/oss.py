@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 # NOTE: 参考代码: https://github.com/aliyun/aliyun-oss-python-sdk
 
@@ -36,34 +35,33 @@ from hashlib import md5
 from hmac import digest as hmac_digest
 from inspect import isawaitable
 from itertools import count
-from typing import cast, overload, Any, Final, Literal
-from urllib.parse import urlsplit, parse_qsl, urlencode
+from typing import Any, Final, Literal, cast, overload
+from urllib.parse import parse_qsl, urlencode, urlsplit
 from xml.etree.ElementTree import fromstring
 
-from fundrives.pan115._vendor.dicttools import iter_items, dict_update
+from fundrives.pan115._vendor.dicttools import dict_update, iter_items
 from fundrives.pan115._vendor.filewrap import (
     SupportsRead,
-    buffer_length,
-    bio_chunk_iter,
     bio_chunk_async_iter,
+    bio_chunk_iter,
+    buffer_length,
     bytes_iter_to_async_reader,
     bytes_iter_to_reader,
-    bytes_to_chunk_iter,
     bytes_to_chunk_async_iter,
+    bytes_to_chunk_iter,
 )
 from fundrives.pan115._vendor.http_request import complete_url
 from fundrives.pan115._vendor.http_response import get_status_code
 from fundrives.pan115._vendor.integer_tool import try_parse_int
 from fundrives.pan115._vendor.iterutils import (
+    Yield,
+    YieldFrom,
     foreach,
     peek_iter,
     run_gen_step,
     run_gen_step_iter,
     wrap_iter,
-    Yield,
-    YieldFrom,
 )
-
 
 SUBRESOURCE_KEYS: Final = {
     "accessPoint",
@@ -166,7 +164,7 @@ def to_base64(s: Buffer | str | UserString, /) -> str:
 
 def parse_upload_id(_, content: Buffer, /) -> str:
     """帮助函数：从响应中提取 "UploadId" """
-    return getattr(fromstring(content).find("UploadId"), "text")
+    return fromstring(content).find("UploadId").text
 
 
 def parse_list_parts(_, content: Buffer, /) -> dict:
@@ -262,7 +260,7 @@ def oss_sign(
                     )
                 )
             }
-/{bucket}{path}{query}""".encode("utf-8"),
+/{bucket}{path}{query}""".encode(),
             "sha1",
         )
     )

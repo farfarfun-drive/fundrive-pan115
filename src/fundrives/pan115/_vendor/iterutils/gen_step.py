@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "iter_gen_step",
@@ -27,21 +26,21 @@ from collections.abc import (
 )
 from concurrent.futures import CancelledError
 from contextlib import (
-    contextmanager,
-    AbstractContextManager,
     AbstractAsyncContextManager,
+    AbstractContextManager,
+    contextmanager,
 )
 from dataclasses import dataclass
 from inspect import isawaitable
 from sys import exc_info
 from typing import (
-    cast,
-    overload,
-    runtime_checkable,
     Any,
     ContextManager,
     Literal,
     Protocol,
+    cast,
+    overload,
+    runtime_checkable,
 )
 
 from fundrives.pan115._vendor.argtools import has_keyword_arg
@@ -134,9 +133,8 @@ def iter_gen_step[Y](
     if async_:
         gen = cast(Generator[Awaitable[Y], None | Y, Awaitable[Y] | Y], gen)
         return iter_gen_step_async(gen)
-    else:
-        gen = cast(Generator[Y, None | Y, Y], gen)
-        return iter_gen_step_sync(gen)
+    gen = cast(Generator[Y, None | Y, Y], gen)
+    return iter_gen_step_sync(gen)
 
 
 def run_gen_step_sync[Y, T](
@@ -207,8 +205,7 @@ def run_gen_step(
         gen = gen()
     if async_:
         return run_gen_step_async(gen, running)
-    else:
-        return run_gen_step_sync(gen, running)
+    return run_gen_step_sync(gen, running)
 
 
 def run_gen_step_iter_sync(
@@ -301,8 +298,7 @@ def run_gen_step_iter(
         gen = gen()
     if async_:
         return run_gen_step_iter_async(gen, running)
-    else:
-        return run_gen_step_iter_sync(gen, running)
+    return run_gen_step_iter_sync(gen, running)
 
 
 @optional

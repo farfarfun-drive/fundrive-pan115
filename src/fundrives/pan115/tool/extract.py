@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "extract_push",
@@ -19,13 +18,13 @@ from collections.abc import (
     Mapping,
 )
 from os import PathLike
-from typing import cast, overload, Any, Literal
+from typing import Any, Literal, cast, overload
 
 from fundrives.pan115._vendor.dicttools import get_first
 from fundrives.pan115._vendor.iterutils import (
+    YieldFrom,
     run_gen_step,
     run_gen_step_iter,
-    YieldFrom,
 )
 
 from ..client import P115Client, check_response

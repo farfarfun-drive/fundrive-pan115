@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 __all__ = [
     "map",
@@ -32,8 +31,12 @@ __all__ = [
     "bfs_gen",
 ]
 
-from asyncio import create_task, sleep as async_sleep
-from builtins import map as _map, filter as _filter, zip as _zip
+from _thread import start_new_thread
+from asyncio import create_task
+from asyncio import sleep as async_sleep
+from builtins import filter as _filter
+from builtins import map as _map
+from builtins import zip as _zip
 from collections import defaultdict, deque
 from collections.abc import (
     AsyncGenerator,
@@ -50,42 +53,42 @@ from collections.abc import (
     Iterator,
     Mapping,
     MutableMapping,
-    MutableSet,
     MutableSequence,
+    MutableSet,
     Sequence,
     ValuesView,
 )
-from contextlib import asynccontextmanager, contextmanager, ExitStack, AsyncExitStack
+from contextlib import AsyncExitStack, ExitStack, asynccontextmanager, contextmanager
 from copy import copy
 from functools import update_wrapper
-from itertools import batched, chain as _chain, pairwise
 from inspect import isawaitable, iscoroutinefunction
+from itertools import batched, pairwise
+from itertools import chain as _chain
 from sys import _getframe
-from _thread import start_new_thread
 from time import sleep, time
 from types import FrameType
 from typing import (
-    cast,
-    overload,
     Any,
     AsyncContextManager,
     ContextManager,
     Literal,
+    cast,
+    overload,
 )
 
 from fundrives.pan115._vendor.asynctools import (
-    async_filter,
-    async_map,
-    async_reduce,
-    async_zip,
     async_batched,
-    ensure_async,
-    ensure_aiter,
     async_chain,
     async_chain_from_iterable,
     async_collect,
+    async_filter,
     async_foreach,
+    async_map,
+    async_reduce,
     async_through,
+    async_zip,
+    ensure_aiter,
+    ensure_async,
 )
 from fundrives.pan115._vendor.texttools import format_time
 from fundrives.pan115._vendor.undefined import undefined
@@ -130,16 +133,14 @@ def map(
         if function is None:
             if iterables:
                 return async_zip(iterable, *iterables, threaded=threaded)
-            elif threaded:
+            if threaded:
                 return ensure_aiter(iterable, threaded=threaded)
-            else:
-                return iterable
+            return iterable
         return async_map(function, iterable, *iterables)
     if function is None:
         if iterables:
             return _zip(iterable, *iterables)
-        else:
-            return iterable
+        return iterable
     return _map(function, iterable, *iterables)
 
 
@@ -274,7 +275,7 @@ def chain_from_iterable[T](
     return _chain.from_iterable(iterables)  # type: ignore
 
 
-setattr(chain, "from_iterable", chain_from_iterable)
+chain.from_iterable = chain_from_iterable
 
 
 @overload
@@ -315,10 +316,9 @@ def chunked[T](
         if n == 1:
             return ((e,) for e in iterable)
         return (iterable[i:j] for i, j in pairwise(range(0, len(iterable) + n, n)))
-    elif not threaded and isinstance(iterable, Iterable):
+    if not threaded and isinstance(iterable, Iterable):
         return batched(iterable, n)
-    else:
-        return async_batched(iterable, n, threaded=threaded)
+    return async_batched(iterable, n, threaded=threaded)
 
 
 def foreach(
@@ -543,9 +543,9 @@ def group_collect[K, V, C: Container, M: MutableMapping](
     else:
         factory_type = type(factory())
     if issubclass(factory_type, MutableSequence):
-        add = getattr(factory_type, "append")
+        add = factory_type.append
     else:
-        add = getattr(factory_type, "add")
+        add = factory_type.add
     if mapping is None:
         mapping = cast(M, {})
     for k, v in iterable:
@@ -598,9 +598,9 @@ async def async_group_collect[K, V, C: Container, M: MutableMapping](
     else:
         factory_type = type(factory())
     if issubclass(factory_type, MutableSequence):
-        add = getattr(factory_type, "append")
+        add = factory_type.append
     else:
-        add = getattr(factory_type, "add")
+        add = factory_type.add
     if mapping is None:
         mapping = cast(M, {})
     async for k, v in iterable:
@@ -868,9 +868,8 @@ def context[T](
                     return ret
 
         return call()
-    else:
-        with ExitStack() as stack:
-            return func(*map(stack.enter_context, ctxs))  # type: ignore
+    with ExitStack() as stack:
+        return func(*map(stack.enter_context, ctxs))  # type: ignore
 
 
 @overload
@@ -945,19 +944,18 @@ def backgroud_loop(
                     print("\r\x1b[K", end="")
 
         return actx()
-    else:
 
-        @contextmanager
-        def ctx():
-            nonlocal running
-            try:
-                yield start_new_thread(run, ())
-            finally:
-                running = False
-                if use_default_call:
-                    print("\r\x1b[K", end="")
+    @contextmanager
+    def ctx():
+        nonlocal running
+        try:
+            yield start_new_thread(run, ())
+        finally:
+            running = False
+            if use_default_call:
+                print("\r\x1b[K", end="")
 
-        return ctx()
+    return ctx()
 
 
 def gen_startup[**Args, G: Generator](func: Callable[Args, G], /):
