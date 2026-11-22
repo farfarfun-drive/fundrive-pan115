@@ -55,13 +55,13 @@ from re import compile as re_compile
 from threading import Lock
 from typing import Any, BinaryIO, Final, Protocol, Self, cast, runtime_checkable
 
+from fundrives.pan115._utils import funcproperty
 from fundrives.pan115._vendor.asynctools import (
     async_chain,
     ensure_aiter,
     ensure_async,
     run_async,
 )
-from fundrives.pan115._vendor.property import funcproperty
 
 READ_BUFSIZE = 1 << 16
 CRE_NOT_UNIX_NEWLINES: Final = re_compile("\r\n|\r")

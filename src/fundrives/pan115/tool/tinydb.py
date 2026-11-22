@@ -8,14 +8,14 @@ from os import PathLike
 from time import time
 from typing import Any, Literal, overload
 
-from fundrives.pan115._vendor.iterutils import foreach, run_gen_step
-from fundrives.pan115._vendor.sqlitetools import (
+from fundrives.pan115._sqlite import (
     connect,
     execute,
     executescript,
     query,
     upsert_items,
 )
+from fundrives.pan115._vendor.iterutils import foreach, run_gen_step
 
 from ..client import P115Client
 from .history import iter_history_once

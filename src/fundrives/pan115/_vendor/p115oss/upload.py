@@ -13,11 +13,10 @@ from uuid import uuid4
 
 from yarl import URL
 
+from fundrives.pan115._hash import file_digest, file_digest_async
+from fundrives.pan115._http import SupportsGeturl, get_filename, get_total_length
 from fundrives.pan115._vendor.asynctools import ensure_async
 from fundrives.pan115._vendor.filewrap import SupportsRead, buffer_length
-from fundrives.pan115._vendor.hashtools import file_digest, file_digest_async
-from fundrives.pan115._vendor.http_request import SupportsGeturl
-from fundrives.pan115._vendor.http_response import get_filename, get_total_length
 from fundrives.pan115._vendor.iterutils import foreach, run_gen_step
 from fundrives.pan115._vendor.p115pickcode import pickcode_to_id, to_id
 
@@ -42,7 +41,7 @@ def urlopen(
     bytes_range: str = "",
     async_: bool = False,
 ):
-    from fundrives.pan115._vendor.urllib3_future_request import request
+    from fundrives.pan115._request import request
 
     headers: dict = {"accept-encoding": "identity"}
     if bytes_range:

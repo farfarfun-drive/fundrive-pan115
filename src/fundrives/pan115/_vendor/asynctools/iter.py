@@ -52,7 +52,7 @@ from itertools import (
 )
 from typing import Any, Self, cast, overload
 
-from fundrives.pan115._vendor.undefined import Undefined, undefined
+from fundrives.pan115._utils import Undefined, undefined
 
 from .basic import ensure_aiter, ensure_async, ensure_coroutine, to_aiter
 from .reduce import async_collect

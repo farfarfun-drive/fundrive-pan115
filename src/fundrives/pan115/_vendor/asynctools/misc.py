@@ -19,7 +19,7 @@ from collections.abc import (
 )
 from typing import Any, cast, overload
 
-from fundrives.pan115._vendor.undefined import Undefined, undefined
+from fundrives.pan115._utils import Undefined, undefined
 
 from .basic import ensure_aiter, ensure_async, to_aiter
 from .type import AsyncReversible

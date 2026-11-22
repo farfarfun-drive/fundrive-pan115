@@ -62,9 +62,9 @@ from filelock import FileLock
 from orjson import dumps, loads
 from yarl import URL
 
+from fundrives.pan115._request import request
 from fundrives.pan115._vendor.iterutils import run_gen_step
 from fundrives.pan115._vendor.p115pickcode import is_valid_pickcode, to_id, to_pickcode
-from fundrives.pan115._vendor.urllib3_future_request import request
 
 from .const import _CACHE_DIR
 

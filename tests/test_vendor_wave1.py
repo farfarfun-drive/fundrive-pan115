@@ -6,29 +6,47 @@ import pathlib
 import tomllib
 from http.cookies import SimpleCookie
 
-from fundrives.pan115._vendor.argtools import argcount
-from fundrives.pan115._vendor.asynctools import ensure_async
-from fundrives.pan115._vendor.cachedict import LRUDict
-from fundrives.pan115._vendor.concurrenttools import threadpool_map
-from fundrives.pan115._vendor.cookietools import cookies_to_dict, update_cookies
-from fundrives.pan115._vendor.dictattr import AttrDict
-from fundrives.pan115._vendor.dicttools import (
+from fundrives.pan115._hash import ed2k_hash, file_digest
+from fundrives.pan115._http import (
+    complete_url,
+    cookies_to_dict,
+    get_status_code,
+    update_cookies,
+)
+from fundrives.pan115._path import (
+    IdToDirnode,
+    escape,
+    joinpath,
+    normpath,
+    splits,
+    translate_iter,
+)
+from fundrives.pan115._sqlite import connect, query
+from fundrives.pan115._utils import (
+    AttrDict,
     KeyLowerDict,
+    LRUDict,
+    Undefined,
+    argcount,
     dict_key_to_lower_merge,
     dict_map,
+    ensure_bytes,
+    errno,
+    errno2error,
+    format_time,
     get_first,
+    grouped_mapping,
+    is_undefined,
+    iter_keyed_dups,
+    locked_cacheproperty,
+    startfile,
+    startfile_async,
+    try_parse_int,
+    undefined,
 )
-from fundrives.pan115._vendor.ed2k import ed2k_hash
-from fundrives.pan115._vendor.ensure import ensure_bytes
-from fundrives.pan115._vendor.errno2 import errno, errno2error
+from fundrives.pan115._vendor.asynctools import ensure_async
+from fundrives.pan115._vendor.concurrenttools import threadpool_map
 from fundrives.pan115._vendor.filewrap import to_bytes_view
-from fundrives.pan115._vendor.glob_pattern import translate_iter
-from fundrives.pan115._vendor.hashtools import file_digest
-from fundrives.pan115._vendor.http_request import complete_url
-from fundrives.pan115._vendor.http_response import get_status_code
-from fundrives.pan115._vendor.id2dirnode import IdToDirnode
-from fundrives.pan115._vendor.integer_tool import try_parse_int
-from fundrives.pan115._vendor.iter_collect import grouped_mapping, iter_keyed_dups
 from fundrives.pan115._vendor.iterutils import chunked
 from fundrives.pan115._vendor.p115cipher import (
     AES_IV,
@@ -46,12 +64,6 @@ from fundrives.pan115._vendor.p115pickcode import (
     to_id,
     to_pickcode,
 )
-from fundrives.pan115._vendor.posixpatht import escape, joinpath, normpath, splits
-from fundrives.pan115._vendor.property import locked_cacheproperty
-from fundrives.pan115._vendor.sqlitetools import connect, query
-from fundrives.pan115._vendor.startfile import startfile, startfile_async
-from fundrives.pan115._vendor.temporary import temp_globals
-from fundrives.pan115._vendor.undefined import Undefined, is_undefined, undefined
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "src" / "fundrives" / "pan115"
@@ -281,10 +293,36 @@ def test_concurrency_iter_and_misc_utilities():
     demo = Demo()
     assert demo.value == 99 and demo.value == 99 and demo.calls == 1
 
-    ns = {"x": 1}
-    with temp_globals(ns, x=2):
-        assert ns["x"] == 2
-    assert ns["x"] == 1
+    # LRUDict with default_factory & LRU eviction order
+    lru_locks: LRUDict[str, list[int]] = LRUDict(2, default_factory=list)
+    lru_locks["a"].append(1)
+    lru_locks["b"].append(2)
+    _ = lru_locks["a"]  # touch "a" so "b" is evicted next
+    lru_locks["c"].append(3)
+    assert "b" not in lru_locks and list(lru_locks) == ["a", "c"]
+
+    # time formatting helper
+    assert format_time(3661) == "01:01:01"
+
+    # async iter_keyed_dups & grouped_mapping
+    import asyncio
+
+    async def _aiter(items):
+        for item in items:
+            yield item
+
+    async def _check_async_iter():
+        g = await grouped_mapping(_aiter([(1, "a"), (1, "b"), (2, "c")]))
+        assert g == {1: ["a", "b"], 2: ["c"]}
+        dups = [
+            x
+            async for x in iter_keyed_dups(
+                _aiter([(1, "a"), (2, "b"), (1, "c")]), keep_first=True
+            )
+        ]
+        assert dups == [(1, "c")]
+
+    asyncio.run(_check_async_iter())
 
 
 def test_httpx_backed_request_sync_and_async():
@@ -294,7 +332,7 @@ def test_httpx_backed_request_sync_and_async():
 
     import httpx
 
-    from fundrives.pan115._vendor.urllib3_future_request import request
+    from fundrives.pan115._request import request
 
     def handler(req: httpx.Request) -> httpx.Response:
         if req.url.path == "/redirect":
@@ -336,3 +374,97 @@ def test_httpx_backed_request_sync_and_async():
             assert adata == {"cookie": "SID=abc", "method": "GET"}
 
     asyncio.run(_run_async())
+
+
+def test_slimming_guard_and_owned_modules():
+    """验证已瘦身移除的 27 个 _vendor 微包不再回归，且自维护模块行为正确。"""
+    import gzip
+    import zlib
+
+    from fundrives.pan115._download import download
+    from fundrives.pan115._http import (
+        decompress_response,
+        get_filename,
+        normalize_request_args,
+    )
+    from fundrives.pan115._iterdir import iterdir_generic, walk_generic
+
+    vendor_entries = sorted(
+        p.name
+        for p in (SRC / "_vendor").iterdir()
+        if p.name not in ("__init__.py", "__pycache__")
+    )
+    assert vendor_entries == [
+        "asynctools",
+        "concurrenttools",
+        "filewrap.py",
+        "httpfile.py",
+        "iterutils",
+        "p115cipher",
+        "p115oss",
+        "p115pickcode.py",
+    ]
+    assert not (SRC / "_vendor" / "p115cipher" / "aes.py").exists()
+
+    # _http: decompress_response (gzip & deflate) + get_filename + normalize_request_args
+    assert decompress_response(gzip.compress(b"hello"), "gzip") == b"hello"
+    assert decompress_response(zlib.compress(b"hello"), "deflate") == b"hello"
+    fake_resp = type(
+        "Resp",
+        (),
+        {
+            "url": "https://example.test/download/report",
+            "headers": {"content-type": "text/plain; charset=utf-8"},
+        },
+    )()
+    assert get_filename(fake_resp) == "report.txt"
+    req_args = normalize_request_args(
+        "post", "example.test/api", json={"a": 1}, headers={"X-Test": "ok"}
+    )
+    assert req_args["method"] == "POST"
+    assert req_args["url"] == "http://example.test/api"
+    assert req_args["headers"]["x-test"] == "ok"
+    assert req_args["data"] == b'{"a":1}'
+
+    # _iterdir: iterdir_generic & walk_generic
+    tree = {"root": ["dir1", "f0"], "dir1": ["f1"]}
+    items = list(
+        iterdir_generic(
+            "root",
+            iterdir=lambda n: tree.get(n, []),
+            isdir=lambda n: n in tree,
+            max_depth=-1,
+        )
+    )
+    assert items == ["dir1", "f1", "f0"]
+    walked = list(
+        walk_generic(
+            "root",
+            iterdir=lambda n: tree.get(n, []),
+            isdir=lambda n: n in tree,
+            max_depth=-1,
+        )
+    )
+    assert walked == [("root", ["dir1"], ["f0"]), ("dir1", [], ["f1"])]
+
+    # _download: download into BytesIO via mock urlopen
+    class _FakeResp:
+        headers = {"content-length": "5"}
+
+        def __init__(self):
+            self._buf = io.BytesIO(b"12345")
+
+        def read(self, n=-1):
+            return self._buf.read(n)
+
+        def close(self):
+            pass
+
+    out = io.BytesIO()
+    prog = download(
+        "https://example.test/file.bin",
+        out,
+        urlopen=lambda _url, headers=None: _FakeResp(),
+    )
+    assert out.getvalue() == b"12345"
+    assert prog.downloaded == 5 and prog.task_done

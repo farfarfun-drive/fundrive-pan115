@@ -29,7 +29,7 @@ from collections.abc import (
 from operator import add
 from typing import Any, cast, overload
 
-from fundrives.pan115._vendor.undefined import Undefined, undefined
+from fundrives.pan115._utils import Undefined, undefined
 
 from .basic import ensure_aiter, ensure_async
 from .type import SupportsAdd, SupportsBool, SupportsRAdd

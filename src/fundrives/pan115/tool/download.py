@@ -48,7 +48,8 @@ from urllib.request import Request, urlopen
 from uuid import uuid4
 from warnings import warn
 
-from fundrives.pan115._vendor.argtools import argcount
+from fundrives.pan115._http import get_status_code, is_timeouterror
+from fundrives.pan115._utils import argcount, errno, get_first
 from fundrives.pan115._vendor.asynctools import async_chain_from_iterable
 from fundrives.pan115._vendor.concurrenttools import (
     conmap,
@@ -56,15 +57,12 @@ from fundrives.pan115._vendor.concurrenttools import (
     iter_page_multi,
     run_as_thread,
 )
-from fundrives.pan115._vendor.dicttools import get_first
-from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.filewrap import (
     bio_chunk_async_iter,
     bio_chunk_iter,
     bytes_to_chunk_async_iter,
     bytes_to_chunk_iter,
 )
-from fundrives.pan115._vendor.http_response import get_status_code, is_timeouterror
 from fundrives.pan115._vendor.iterutils import (
     Yield,
     YieldFrom,

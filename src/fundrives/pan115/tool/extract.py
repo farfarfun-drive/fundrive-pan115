@@ -20,7 +20,7 @@ from collections.abc import (
 from os import PathLike
 from typing import Any, Literal, cast, overload
 
-from fundrives.pan115._vendor.dicttools import get_first
+from fundrives.pan115._utils import get_first
 from fundrives.pan115._vendor.iterutils import (
     YieldFrom,
     run_gen_step,

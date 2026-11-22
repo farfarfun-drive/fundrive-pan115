@@ -238,97 +238,18 @@ def _unpad(data, /):
     return data
 
 
-aes_cbc_encrypt: Callable[[Buffer, bytes, bytes], bytes]
-aes_cbc_decrypt: Callable[[Buffer, bytes, bytes], bytes]
-try:
-    from Crypto.Cipher import AES
+from Crypto.Cipher import AES
 
-    def aes_cbc_encrypt(data, aes_key, aes_iv):
-        return AES.new(aes_key, AES.MODE_CBC, aes_iv).encrypt(_pad(data))
 
-    def aes_cbc_decrypt(cipher_data, aes_key, aes_iv):
-        view = to_bytes_view(cipher_data)
-        return _unpad(
-            AES.new(aes_key, AES.MODE_CBC, aes_iv).decrypt(view[: len(view) & -16])
-        )
-except ImportError:
-    try:
-        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+def aes_cbc_encrypt(data: Buffer, aes_key: bytes, aes_iv: bytes) -> bytes:
+    return AES.new(aes_key, AES.MODE_CBC, aes_iv).encrypt(_pad(data))
 
-        def aes_cbc_encrypt(data, aes_key, aes_iv):
-            cipher = Cipher(algorithms.AES(aes_key), modes.CBC(aes_iv))
-            encryptor = cipher.encryptor()
-            return encryptor.update(_pad(data)) + encryptor.finalize()
 
-        def aes_cbc_decrypt(cipher_data, aes_key, aes_iv):
-            cipher = Cipher(algorithms.AES(aes_key), modes.CBC(aes_iv))
-            decryptor = cipher.decryptor()
-            return _unpad(decryptor.update(cipher_data) + decryptor.finalize())
-    except ImportError:
-        from shutil import which
-
-        if which("openssl"):
-            from subprocess import check_output
-
-            def aes_cbc_encrypt(data, aes_key, aes_iv):
-                return check_output(
-                    [
-                        "openssl",
-                        "enc",
-                        "-aes-128-cbc",
-                        "-e",
-                        "-K",
-                        aes_key.hex(),
-                        "-iv",
-                        aes_iv.hex(),
-                        "-nosalt",
-                    ],
-                    input=data,
-                )
-
-            def aes_cbc_decrypt(cipher_data, aes_key, aes_iv):
-                return check_output(
-                    [
-                        "openssl",
-                        "enc",
-                        "-aes-128-cbc",
-                        "-d",
-                        "-K",
-                        aes_key.hex(),
-                        "-iv",
-                        aes_iv.hex(),
-                        "-nosalt",
-                    ],
-                    input=cipher_data,
-                )
-        else:
-            from .aes import AES as AES_
-
-            def aes_cbc_encrypt(data, aes_key, aes_iv):
-                encrypt = AES_(aes_key).encrypt
-                view = to_bytes_view(_pad(data))
-                b = bytearray()
-                puts = b.extend
-                last_cipher = aes_iv
-                for i in range(0, len(view), 16):
-                    last_cipher = encrypt(
-                        [(p ^ l) for (p, l) in zip(view[i : i + 16], last_cipher)]
-                    )
-                    puts(last_cipher)
-                return b
-
-            def aes_cbc_decrypt(cipher_data, aes_key, aes_iv):
-                decrypt = AES_(aes_key).decrypt
-                view = to_bytes_view(cipher_data)
-                b = bytearray()
-                puts = b.extend
-                last_cipher = aes_iv
-                for i in range(0, len(view), 16):
-                    puts(
-                        p ^ l for (p, l) in zip(decrypt(view[i : i + 16]), last_cipher)
-                    )
-                    last_cipher = view[i : i + 16]
-                return _unpad(b)
+def aes_cbc_decrypt(cipher_data: Buffer, aes_key: bytes, aes_iv: bytes) -> bytes:
+    view = to_bytes_view(cipher_data)
+    return _unpad(
+        AES.new(aes_key, AES.MODE_CBC, aes_iv).decrypt(view[: len(view) & -16])
+    )
 
 
 lz4_block_decompress: Callable[[Buffer, int], bytes]

@@ -20,9 +20,8 @@ from http.cookiejar import Cookie, CookieJar
 from http.cookies import Morsel
 from typing import Any, NamedTuple, Self
 
-from fundrives.pan115._vendor.cookietools import cookies_to_dict
-from fundrives.pan115._vendor.dicttools import iter_items
-from fundrives.pan115._vendor.undefined import undefined
+from fundrives.pan115._http import cookies_to_dict
+from fundrives.pan115._utils import iter_items, undefined
 
 from .const import SSOENT_TO_APP
 from .exception import P115BadDownloadUrl

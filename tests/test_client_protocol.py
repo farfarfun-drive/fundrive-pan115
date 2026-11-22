@@ -13,7 +13,7 @@ from fundrives.pan115 import (
     P115OSError,
     check_response,
 )
-from fundrives.pan115._vendor.urllib3_future_request import request as httpx_request
+from fundrives.pan115._request import request as httpx_request
 from fundrives.pan115.util import share_extract_payload
 
 COOKIES = "UID=100_A1_1; CID=cid_val; SEID=seid_val; KID=kid_val"

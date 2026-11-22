@@ -10,7 +10,7 @@ from os import PathLike
 from time import sleep, time
 from typing import Literal, overload
 
-from fundrives.pan115._vendor.errno2 import errno
+from fundrives.pan115._utils import errno
 from fundrives.pan115._vendor.iterutils import (
     Yield,
     YieldFrom,

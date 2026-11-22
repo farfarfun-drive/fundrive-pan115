@@ -6,11 +6,10 @@ __doc__ = "这个模块提供了一个和查询数据库有关的类"
 from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from typing import Any, cast, overload
 
-from fundrives.pan115._vendor.errno2 import errno
-from fundrives.pan115._vendor.iter_collect import grouped_mapping
+from fundrives.pan115._path import escape, path_is_dir_form, splits
+from fundrives.pan115._sqlite import connect, find, query
+from fundrives.pan115._utils import errno, grouped_mapping
 from fundrives.pan115._vendor.iterutils import bfs_gen
-from fundrives.pan115._vendor.posixpatht import escape, path_is_dir_form, splits
-from fundrives.pan115._vendor.sqlitetools import connect, find, query
 
 from ..util import posix_escape_name
 
@@ -700,7 +699,7 @@ WHERE
             con = self
         if isinstance(escape, bool):
             if escape:
-                from fundrives.pan115._vendor.posixpatht import escape
+                from fundrives.pan115._path import escape
             else:
                 escape = posix_escape_name
         escape = cast(None | Callable[[str], str], escape)
@@ -934,7 +933,7 @@ WHERE
             con = self
         if isinstance(escape, bool):
             if escape:
-                from fundrives.pan115._vendor.posixpatht import escape
+                from fundrives.pan115._path import escape
             else:
                 escape = posix_escape_name
         escape = cast(None | Callable[[str], str], escape)

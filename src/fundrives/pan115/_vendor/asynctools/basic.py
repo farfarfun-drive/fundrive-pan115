@@ -33,7 +33,7 @@ from contextlib import (
 from inspect import isawaitable, iscoroutine, iscoroutinefunction
 from typing import Any, AsyncContextManager, cast
 
-from fundrives.pan115._vendor.decotools import decorated
+from fundrives.pan115._utils import decorated
 
 
 async def to_coroutine[T](o: T, /) -> T:

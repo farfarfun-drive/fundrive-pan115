@@ -43,9 +43,8 @@ from typing import (
     runtime_checkable,
 )
 
-from fundrives.pan115._vendor.argtools import has_keyword_arg
+from fundrives.pan115._utils import has_keyword_arg, optional
 from fundrives.pan115._vendor.asynctools import in_async
-from fundrives.pan115._vendor.decotools import optional
 
 
 @runtime_checkable

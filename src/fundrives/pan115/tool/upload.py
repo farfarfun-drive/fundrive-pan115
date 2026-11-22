@@ -44,12 +44,10 @@ except ImportError:
     )
 from yarl import URL
 
-from fundrives.pan115._vendor.dicttools import dict_map, get_first
-from fundrives.pan115._vendor.errno2 import errno
+from fundrives.pan115._hash import file_mdigest, file_mdigest_async
+from fundrives.pan115._http import SupportsGeturl, get_total_length
+from fundrives.pan115._utils import dict_map, errno, get_first
 from fundrives.pan115._vendor.filewrap import SupportsRead
-from fundrives.pan115._vendor.hashtools import file_mdigest, file_mdigest_async
-from fundrives.pan115._vendor.http_request import SupportsGeturl
-from fundrives.pan115._vendor.http_response import get_total_length
 from fundrives.pan115._vendor.iterutils import (
     Yield,
     YieldFrom,

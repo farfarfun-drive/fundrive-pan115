@@ -15,6 +15,14 @@ from typing import Any, Literal, overload
 
 from orjson import dumps
 
+from fundrives.pan115._sqlite import (
+    connect,
+    execute,
+    executescript,
+    find,
+    query,
+    upsert_items,
+)
 from fundrives.pan115._vendor.asynctools import ensure_async
 from fundrives.pan115._vendor.iterutils import (
     Yield,
@@ -23,14 +31,6 @@ from fundrives.pan115._vendor.iterutils import (
     run_gen_step,
     run_gen_step_iter,
     with_iter_next,
-)
-from fundrives.pan115._vendor.sqlitetools import (
-    connect,
-    execute,
-    executescript,
-    find,
-    query,
-    upsert_items,
 )
 
 from ..client import P115Client

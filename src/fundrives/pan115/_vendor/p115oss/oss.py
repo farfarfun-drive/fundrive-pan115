@@ -39,7 +39,8 @@ from typing import Any, Final, Literal, cast, overload
 from urllib.parse import parse_qsl, urlencode, urlsplit
 from xml.etree.ElementTree import fromstring
 
-from fundrives.pan115._vendor.dicttools import dict_update, iter_items
+from fundrives.pan115._http import complete_url, get_status_code
+from fundrives.pan115._utils import dict_update, iter_items, try_parse_int
 from fundrives.pan115._vendor.filewrap import (
     SupportsRead,
     bio_chunk_async_iter,
@@ -50,9 +51,6 @@ from fundrives.pan115._vendor.filewrap import (
     bytes_to_chunk_async_iter,
     bytes_to_chunk_iter,
 )
-from fundrives.pan115._vendor.http_request import complete_url
-from fundrives.pan115._vendor.http_response import get_status_code
-from fundrives.pan115._vendor.integer_tool import try_parse_int
 from fundrives.pan115._vendor.iterutils import (
     Yield,
     YieldFrom,
@@ -298,7 +296,7 @@ def oss_request(
     def gen_step():
         nonlocal endpoint, request, token
         if request is None:
-            from fundrives.pan115._vendor.urllib3_future_request import request
+            from fundrives.pan115._request import request
 
             request = cast(Callable, request)
         if not endpoint:

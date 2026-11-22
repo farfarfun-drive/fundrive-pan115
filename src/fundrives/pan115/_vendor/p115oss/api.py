@@ -19,7 +19,7 @@ from typing import Any, Final, Literal, overload
 
 from orjson import loads
 
-from fundrives.pan115._vendor.dicttools import dict_update, iter_items
+from fundrives.pan115._utils import dict_update, iter_items
 from fundrives.pan115._vendor.iterutils import run_gen_step
 from fundrives.pan115._vendor.p115cipher import ecdh_aes_decrypt, make_upload_payload
 
@@ -37,7 +37,7 @@ def get_request(request_kwargs: dict, /) -> Callable:
     request_kwargs.setdefault("parse", parse_json)
     request = request_kwargs.pop("request", None)
     if request is None:
-        from fundrives.pan115._vendor.urllib3_future_request import request
+        from fundrives.pan115._request import request
     return request
 
 

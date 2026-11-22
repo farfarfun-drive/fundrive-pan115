@@ -52,6 +52,7 @@ uv build
 1. **阶段 0（已完成）**：完整迁入 `p115client 0.0.9.6.5.1` 至 `fundrives.pan115` 命名空间，保持 API 100% 兼容，隔离上游高频改动。
 2. **阶段 1 & 2（已完成）**：移除未使用的 `python-encode_uri`，将全部 35 个上游微包内联至 `fundrives.pan115._vendor/`，并用标准 `httpx` 替换 `urllib3-future` 避免劫持标准 `urllib3`，实现 **0 个上游作者微包依赖**。
 3. **阶段 3（已完成）**：为 `wcwidth`、`sqlparse`、`zstandard`/`brotli` 提供标准库回落与可选化，直接依赖进一步收敛至 **6 个核心主流包**（`filelock`、`httpx`、`orjson`、`pycryptodome`、`qrcode`、`yarl`）；消除全局 `warnings.formatwarning` 污染与 Python 3.14 `SyntaxWarning`；大幅收紧 `per-file-ignores` 并补齐 `P115Client` 协议级单测。
+4. **阶段 4（持续瘦身）**：移除 `_vendor/` 中 **27 / 35 个**上游作者微包与冗余纯 Python AES 回落（净削减 ~11,700 行代码），将实际使用到的最小工具子集重写并归并为 8 个严格通过 Ruff 基线的自主内部模块（`_utils.py`、`_path.py`、`_hash.py`、`_sqlite.py`、`_http.py`、`_request.py`、`_iterdir.py`、`_download.py`），`_vendor/` 仅余 3 个 115 协议模块与 5 个流式/并发核心层。
 
 ## 命名空间说明
 

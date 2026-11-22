@@ -36,7 +36,7 @@ from threading import Lock
 from time import sleep, time
 from typing import Literal, cast, overload
 
-from fundrives.pan115._vendor.argtools import argcount
+from fundrives.pan115._utils import argcount
 
 from .basic import run_as_async, run_as_thread
 

@@ -17,9 +17,7 @@ from posixpath import basename, dirname
 from threading import Lock
 from typing import Any, Literal, overload
 
-from fundrives.pan115._vendor.dictattr import AttrDict
-from fundrives.pan115._vendor.dicttools import dict_key_to_lower_update
-from fundrives.pan115._vendor.errno2 import errno
+from fundrives.pan115._utils import AttrDict, dict_key_to_lower_update, errno
 from fundrives.pan115._vendor.iterutils import (
     Yield,
     run_gen_step,

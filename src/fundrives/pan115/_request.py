@@ -26,16 +26,17 @@ from warnings import warn
 import httpx
 from yarl import URL
 
-from fundrives.pan115._vendor.cookietools import (
+from fundrives.pan115._http import (
+    SupportsGeturl,
     cookie_header_for_url,
     cookies_dict_to_str,
     cookies_str_to_dict,
     extract_cookies,
+    normalize_request_args,
+    parse_response,
 )
-from fundrives.pan115._vendor.dicttools import dict_merge
+from fundrives.pan115._utils import dict_merge
 from fundrives.pan115._vendor.filewrap import SupportsRead
-from fundrives.pan115._vendor.http_request import SupportsGeturl, normalize_request_args
-from fundrives.pan115._vendor.http_response import parse_response
 
 __all__ = ["request_sync", "request_async", "request"]
 

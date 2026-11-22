@@ -52,14 +52,13 @@ from queue import Empty, Queue, SimpleQueue
 from threading import Event, Lock, Semaphore, Thread
 from typing import Any, ContextManager, Literal, cast, overload
 
-from fundrives.pan115._vendor.argtools import argcount, has_keyword_arg
+from fundrives.pan115._utils import argcount, has_keyword_arg, optional
 from fundrives.pan115._vendor.asynctools import (
     async_map,
     async_zip,
     ensure_coroutine,
     run_async,
 )
-from fundrives.pan115._vendor.decotools import optional
 
 if "__del__" not in ThreadPoolExecutor.__dict__:
     ThreadPoolExecutor.__del__ = lambda self, /: self.shutdown(

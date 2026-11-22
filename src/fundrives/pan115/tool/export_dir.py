@@ -307,7 +307,7 @@ def export_dir_parse_iter_path(
     """
     if isinstance(escape, bool):
         if escape:
-            from fundrives.pan115._vendor.posixpatht import escape
+            from fundrives.pan115._path import escape
         else:
             from fundrives.pan115.util import posix_escape_name as escape
     escape = cast(None | Callable[[str], str], escape)

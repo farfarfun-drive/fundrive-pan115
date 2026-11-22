@@ -39,9 +39,16 @@ from warnings import warn
 
 from yarl import URL
 
-from fundrives.pan115._vendor.argtools import argcount
+from fundrives.pan115._http import (
+    SupportsGeturl,
+    get_filename,
+    get_range,
+    get_status_code,
+    get_total_length,
+    is_range_request,
+)
+from fundrives.pan115._utils import argcount, errno
 from fundrives.pan115._vendor.asynctools import ensure_async, run_async
-from fundrives.pan115._vendor.errno2 import errno
 from fundrives.pan115._vendor.filewrap import (
     AsyncBufferedReader,
     AsyncTextIOWrapper,
@@ -49,14 +56,6 @@ from fundrives.pan115._vendor.filewrap import (
     bytes_iter_to_async_reader,
     bytes_iter_to_reader,
     to_bytes_view,
-)
-from fundrives.pan115._vendor.http_request import SupportsGeturl
-from fundrives.pan115._vendor.http_response import (
-    get_filename,
-    get_range,
-    get_status_code,
-    get_total_length,
-    is_range_request,
 )
 
 
@@ -113,7 +112,7 @@ class HTTPFileReader[Response](RawIOBase, BinaryIO):
         self._url = url
         self.seek_threshold = max(seek_threshold, 0)
         if request is None:
-            from fundrives.pan115._vendor.urllib3_future_request import (
+            from fundrives.pan115._request import (
                 request_sync as request,
             )  # type: ignore
         self.request = cast(Callable[..., Response], request)
@@ -188,7 +187,7 @@ class HTTPFileReader[Response](RawIOBase, BinaryIO):
     def _init_info(self, /, key: str = "length"):
         response = self.__dict__.get("response")
         if response is None:
-            from fundrives.pan115._vendor.urllib3_future_request import (
+            from fundrives.pan115._request import (
                 request_sync as request,
             )
 
@@ -738,7 +737,7 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
         self._url = url
         self.seek_threshold = max(seek_threshold, 0)
         if request is None:
-            from fundrives.pan115._vendor.urllib3_future_request import (
+            from fundrives.pan115._request import (
                 request_async as request,
             )  # type: ignore
         self.request = cast(Callable[..., Awaitable[Response]], request)
@@ -845,7 +844,7 @@ class AsyncHTTPFileReader[Response](RawIOBase, BinaryIO):
     async def _init_info(self, /, key: str = "length"):
         response = self.__dict__.get("response")
         if response is None:
-            from fundrives.pan115._vendor.urllib3_future_request import (
+            from fundrives.pan115._request import (
                 request_async as request,
             )
 
@@ -1473,7 +1472,7 @@ class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
     ):
         self.seek_threshold = seek_threshold
         if request is None:
-            from fundrives.pan115._vendor.urllib3_future_request import (
+            from fundrives.pan115._request import (
                 request_sync as request,
             )  # type: ignore
         self.request = cast(Callable[..., Response], request)
@@ -1490,7 +1489,7 @@ class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
         else:
             urls = list(urls)  # type: ignore
 
-        from fundrives.pan115._vendor.urllib3_future_request import request_sync
+        from fundrives.pan115._request import request_sync
 
         self._parts: list[dict] = []
         add_part = self._parts.append
@@ -1649,7 +1648,7 @@ class MultipartHTTPFileReader[Response](HTTPFileReader[Response]):
         return bytes(buf)
 
     def readinto_range(self, buffer: Buffer, /, offset: int = 0):
-        from fundrives.pan115._vendor.urllib3_future_request import (
+        from fundrives.pan115._request import (
             request_sync as request,
         )
 
@@ -1843,7 +1842,7 @@ class AsyncMultipartHTTPFileReader[Response](AsyncHTTPFileReader[Response]):
     ):
         self.seek_threshold = seek_threshold
         if request is None:
-            from fundrives.pan115._vendor.urllib3_future_request import (
+            from fundrives.pan115._request import (
                 request_async as request,
             )  # type: ignore
         self.request = cast(Callable[..., Awaitable[Response]], request)
@@ -1860,7 +1859,7 @@ class AsyncMultipartHTTPFileReader[Response](AsyncHTTPFileReader[Response]):
         else:
             urls = list(urls)  # type: ignore
 
-        from fundrives.pan115._vendor.urllib3_future_request import request_async
+        from fundrives.pan115._request import request_async
 
         self._parts: list[dict] = []
         add_part = self._parts.append
@@ -2077,7 +2076,7 @@ class AsyncMultipartHTTPFileReader[Response](AsyncHTTPFileReader[Response]):
         return bytes(buf)
 
     async def readinto_range(self, buffer: Buffer, /, offset: int = 0):
-        from fundrives.pan115._vendor.urllib3_future_request import request_async
+        from fundrives.pan115._request import request_async
 
         if offset < 0:
             offset += self.length

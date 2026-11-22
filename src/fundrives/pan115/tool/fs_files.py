@@ -9,9 +9,9 @@ from os import PathLike
 from typing import Any, Final, Literal, overload
 from warnings import warn
 
+from fundrives.pan115._http import get_status_code, is_timeouterror
+from fundrives.pan115._utils import errno
 from fundrives.pan115._vendor.concurrenttools import iter_offset
-from fundrives.pan115._vendor.errno2 import errno
-from fundrives.pan115._vendor.http_response import get_status_code, is_timeouterror
 from fundrives.pan115._vendor.iterutils import as_gen_step, run_gen_step
 
 from ..client import P115Client, P115OpenClient, check_response

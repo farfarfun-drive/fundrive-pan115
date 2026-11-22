@@ -31,8 +31,8 @@ from collections.abc import Mapping
 from functools import cached_property
 from typing import Never
 
-from fundrives.pan115._vendor.errno2 import errno
-from fundrives.pan115._vendor.errno2 import errno2error as _errno2error
+from fundrives.pan115._utils import errno
+from fundrives.pan115._utils import errno2error as _errno2error
 
 
 class P115Error(Exception):

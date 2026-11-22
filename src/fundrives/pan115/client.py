@@ -41,25 +41,27 @@ from warnings import warn
 from orjson import dumps, loads
 from yarl import URL
 
-from fundrives.pan115._vendor.asynctools import ensure_async
-from fundrives.pan115._vendor.cookietools import cookies_to_dict, update_cookies
-from fundrives.pan115._vendor.dicttools import (
+from fundrives.pan115._http import (
+    SupportsGeturl,
+    cookies_to_dict,
+    get_status_code,
+    update_cookies,
+)
+from fundrives.pan115._http import (
+    complete_url as make_url,
+)
+from fundrives.pan115._utils import (
     KeyLowerDict,
     dict_key_to_lower_merge,
     dict_update,
+    ensure_bytes,
+    errno,
     get_first,
     iter_items,
+    locked_cacheproperty,
 )
-from fundrives.pan115._vendor.ensure import ensure_bytes
-from fundrives.pan115._vendor.errno2 import errno
+from fundrives.pan115._vendor.asynctools import ensure_async
 from fundrives.pan115._vendor.filewrap import SupportsRead, to_bytes_view
-from fundrives.pan115._vendor.http_request import (
-    SupportsGeturl,
-)
-from fundrives.pan115._vendor.http_request import (
-    complete_url as make_url,
-)
-from fundrives.pan115._vendor.http_response import get_status_code
 from fundrives.pan115._vendor.httpfile import AsyncHTTPFileReader, HTTPFileReader
 from fundrives.pan115._vendor.iterutils import run_gen_step
 from fundrives.pan115._vendor.p115cipher import (
@@ -72,8 +74,6 @@ from fundrives.pan115._vendor.p115cipher import (
 )
 from fundrives.pan115._vendor.p115oss import upload_file
 from fundrives.pan115._vendor.p115pickcode import to_id, to_pickcode
-from fundrives.pan115._vendor.property import locked_cacheproperty
-from fundrives.pan115._vendor.temporary import temp_globals
 
 from .const import (
     CLIENT_API_METHODS_MAP,
@@ -160,7 +160,7 @@ def get_request(
         )
         return self.request, request_kwargs
     if request is None:
-        from fundrives.pan115._vendor.urllib3_future_request import request
+        from fundrives.pan115._request import request
     request = cast(Callable, request)
     request_kwargs.update(url=url, method=method)
     is_open_api = URL(url).path.startswith("/open/")
@@ -764,7 +764,7 @@ class ClientRequestMixin:
 
                 .. code:: python
 
-                    from fundrives.pan115._vendor.urllib3_future_request import request
+                    from fundrives.pan115._request import request
 
             15. `niquests_request <https://pypi.org/project/niquests_request/>`_，由 `niquests <https://niquests.readthedocs.io/en/latest/>`_ 封装，支持同步和异步请求
 
@@ -862,7 +862,7 @@ class ClientRequestMixin:
         if isinstance(url, P115URL):
             headers.update(url.get("headers") or ())
         if urlopen is None:
-            from fundrives.pan115._vendor.urllib3_future_request import (
+            from fundrives.pan115._request import (
                 request as urlopen,
             )
         urlopen = cast(Callable, urlopen)
@@ -1838,7 +1838,7 @@ class ClientRequestMixin:
                 qrcode = "https://115.com/scan/dg-" + login_uid
             if not console_qrcode:
                 try:
-                    from fundrives.pan115._vendor.startfile import (
+                    from fundrives.pan115._utils import (
                         startfile,
                         startfile_async,
                     )
@@ -1960,7 +1960,7 @@ class ClientRequestMixin:
                 qrcode = "https://115.com/scan/dg-" + login_uid
             if not console_qrcode:
                 try:
-                    from fundrives.pan115._vendor.startfile import (
+                    from fundrives.pan115._utils import (
                         startfile,
                         startfile_async,
                     )
@@ -30903,22 +30903,20 @@ class P115Client(P115OpenClient):
         )
 
 
-with temp_globals():
-    CRE_CLIENT_API_search: Final = re_compile(
-        r"^ *((?:GET|POST|PUT|DELETE|PATCH) +.+)", MULTILINE
-    ).search
+def _populate_client_api_maps() -> None:
+    cre_search = re_compile(r"^ *((?:GET|POST|PUT|DELETE|PATCH) +.+)", MULTILINE).search
     for name in dir(P115Client):
         method = getattr(P115Client, name)
         if not (callable(method) and method.__doc__):
             continue
-        if match := CRE_CLIENT_API_search(method.__doc__):
+        if match := cre_search(method.__doc__):
             api = match[1]
-            name = "P115Client." + name
-            CLIENT_METHOD_API_MAP[name] = api
-            try:
-                CLIENT_API_METHODS_MAP[api].append(name)
-            except KeyError:
-                CLIENT_API_METHODS_MAP[api] = [name]
+            full_name = "P115Client." + name
+            CLIENT_METHOD_API_MAP[full_name] = api
+            CLIENT_API_METHODS_MAP.setdefault(api, []).append(full_name)
+
+
+_populate_client_api_maps()
 
 
 from .fs import (

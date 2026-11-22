@@ -19,11 +19,9 @@ from typing import Any, ClassVar, Literal, Self, overload
 
 from yarl import URL
 
-from fundrives.pan115._vendor.dictattr import AttrDict
-from fundrives.pan115._vendor.dicttools import dict_key_to_lower_update
-from fundrives.pan115._vendor.errno2 import errno
+from fundrives.pan115._http import SupportsGeturl
+from fundrives.pan115._utils import AttrDict, dict_key_to_lower_update, errno
 from fundrives.pan115._vendor.filewrap import Buffer, SupportsRead
-from fundrives.pan115._vendor.http_request import SupportsGeturl
 from fundrives.pan115._vendor.iterutils import run_gen_step
 from fundrives.pan115._vendor.p115pickcode import is_valid_pickcode
 

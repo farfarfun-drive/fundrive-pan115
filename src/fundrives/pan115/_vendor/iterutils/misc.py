@@ -76,6 +76,7 @@ from typing import (
     overload,
 )
 
+from fundrives.pan115._utils import format_time, undefined
 from fundrives.pan115._vendor.asynctools import (
     async_batched,
     async_chain,
@@ -90,8 +91,6 @@ from fundrives.pan115._vendor.asynctools import (
     ensure_aiter,
     ensure_async,
 )
-from fundrives.pan115._vendor.texttools import format_time
-from fundrives.pan115._vendor.undefined import undefined
 
 
 def _coalesce(vals, default=None):
