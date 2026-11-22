@@ -50,8 +50,8 @@ uv build
 ## 演进路线
 
 1. **阶段 0（已完成）**：完整迁入 `p115client 0.0.9.6.5.1` 至 `fundrives.pan115` 命名空间，保持 API 100% 兼容，隔离上游高频改动。
-2. **阶段 1 & 2（已完成）**：移除未使用的 `python-encode_uri`，并将全部 35 个上游微包（`p115cipher` / `p115oss` / `p115pickcode` / `python-*` / `urllib3_future_request` 等）内联至 `fundrives.pan115._vendor/`，直接依赖从 37 个收敛至 **10 个主流标准生态包**，实现 **0 个上游作者微包依赖**。
-3. **后续持续演进**：按需精简未用模块、将 `urllib3-future` 替换为标准 `requests`/`httpx` 并逐步收紧 `per-file-ignores`。
+2. **阶段 1 & 2（已完成）**：移除未使用的 `python-encode_uri`，将全部 35 个上游微包内联至 `fundrives.pan115._vendor/`，并用标准 `httpx` 替换 `urllib3-future` 避免劫持标准 `urllib3`，实现 **0 个上游作者微包依赖**（仅剩 10 个主流标准生态包）。
+3. **后续持续演进**：按需精简未用模块并逐步收紧 `pyproject.toml` 中的 `per-file-ignores`。
 
 ## 命名空间说明
 

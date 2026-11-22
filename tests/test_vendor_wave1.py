@@ -92,6 +92,7 @@ ELIMINATED_DISTS = {
     "python-undefined",
     "socket-keepalive",
     "sqlitetools",
+    "urllib3-future",
     "urllib3_future_request",
 }
 
@@ -131,6 +132,7 @@ ELIMINATED_MODULES = {
     "temporary",
     "texttools",
     "undefined",
+    "urllib3_future",
     "urllib3_future_request",
 }
 
@@ -279,3 +281,54 @@ def test_concurrency_iter_and_misc_utilities():
     with temp_globals(ns, x=2):
         assert ns["x"] == 2
     assert ns["x"] == 1
+
+
+def test_httpx_backed_request_sync_and_async():
+    """验证基于 httpx 的同步/异步请求适配层（JSON 解析、重定向、Cookie 传递与流式读取）。"""
+    import asyncio
+    from http.cookiejar import CookieJar
+
+    import httpx
+
+    from fundrives.pan115._vendor.urllib3_future_request import request
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        if req.url.path == "/redirect":
+            return httpx.Response(
+                302,
+                headers={"location": "/target", "set-cookie": "SID=abc; Path=/"},
+            )
+        if req.url.path == "/target":
+            return httpx.Response(
+                200,
+                json={"cookie": req.headers.get("cookie", ""), "method": req.method},
+            )
+        return httpx.Response(200, content=b"stream-body")
+
+    jar = CookieJar()
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        data = request(
+            "https://example.test/redirect",
+            session=client,
+            cookies=jar,
+            parse=True,
+        )
+        assert data == {"cookie": "SID=abc", "method": "GET"}
+        raw = request("https://example.test/raw", session=client, parse=None)
+        assert raw.read(6) == b"stream"
+        assert raw.read() == b"-body"
+        raw.close()
+
+    async def _run_async():
+        jar2 = CookieJar()
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as aclient:
+            adata = await request(
+                "https://example.test/redirect",
+                session=aclient,
+                cookies=jar2,
+                parse=True,
+                async_=True,
+            )
+            assert adata == {"cookie": "SID=abc", "method": "GET"}
+
+    asyncio.run(_run_async())
