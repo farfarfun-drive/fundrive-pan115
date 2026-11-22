@@ -39,7 +39,7 @@ from typing import (
     Protocol,
     Self,
     SupportsInt,
-    TypeIs,
+    TypeGuard,
     cast,
     final,
 )
@@ -116,7 +116,7 @@ class Undefined:
 undefined: Final[Undefined] = Undefined()
 
 
-def is_undefined(o: object, /) -> TypeIs[Undefined]:
+def is_undefined(o: object, /) -> TypeGuard[Undefined]:
     return isinstance(o, Undefined)
 
 
