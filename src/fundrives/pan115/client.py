@@ -39,16 +39,16 @@ from uuid import uuid4
 from warnings import warn
 
 from asynctools import ensure_async
-from cookietools import cookies_to_dict, update_cookies
-from dicttools import (
+from fundrives.pan115._vendor.cookietools import cookies_to_dict, update_cookies
+from fundrives.pan115._vendor.dicttools import (
     get_first,
     dict_update,
     dict_key_to_lower_merge,
     iter_items,
     KeyLowerDict,
 )
-from ensure import ensure_bytes
-from errno2 import errno
+from fundrives.pan115._vendor.ensure import ensure_bytes
+from fundrives.pan115._vendor.errno2 import errno
 from filewrap import to_bytes_view, SupportsRead
 from http_request import complete_url as make_url, SupportsGeturl
 from http_response import get_status_code
@@ -64,9 +64,9 @@ from p115cipher import (
     make_upload_payload,
 )
 from p115oss import upload_file
-from p115pickcode import to_id, to_pickcode
-from property import locked_cacheproperty
-from temporary import temp_globals
+from fundrives.pan115._vendor.p115pickcode import to_id, to_pickcode
+from fundrives.pan115._vendor.property import locked_cacheproperty
+from fundrives.pan115._vendor.temporary import temp_globals
 from yarl import URL
 
 from .const import (
@@ -1832,7 +1832,10 @@ class ClientRequestMixin:
                 qrcode = "https://115.com/scan/dg-" + login_uid
             if not console_qrcode:
                 try:
-                    from startfile import startfile, startfile_async
+                    from fundrives.pan115._vendor.startfile import (
+                        startfile,
+                        startfile_async,
+                    )
                 except ImportError:
                     console_qrcode = True
             if console_qrcode:
@@ -1951,7 +1954,10 @@ class ClientRequestMixin:
                 qrcode = "https://115.com/scan/dg-" + login_uid
             if not console_qrcode:
                 try:
-                    from startfile import startfile, startfile_async
+                    from fundrives.pan115._vendor.startfile import (
+                        startfile,
+                        startfile_async,
+                    )
                 except ImportError:
                     console_qrcode = True
             if console_qrcode:

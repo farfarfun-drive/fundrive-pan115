@@ -59,7 +59,7 @@ from iterutils import (
     as_gen_step,
     through,
 )
-from p115pickcode import to_id
+from fundrives.pan115._vendor.p115pickcode import to_id
 
 from ..client import check_response, P115Client, P115OpenClient
 from ..exception import P115BusyOSError

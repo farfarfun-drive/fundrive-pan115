@@ -41,12 +41,12 @@ from typing import (
 )
 from weakref import WeakValueDictionary
 
-from cachedict import LRUDict
+from fundrives.pan115._vendor.cachedict import LRUDict
 from download import download, download_async
 from ed2k import ed2k_hash, ed2k_hash_async
-from errno2 import errno
+from fundrives.pan115._vendor.errno2 import errno
 from filewrap import AsyncBufferedReader, AsyncTextIOWrapper
-from glob_pattern import translate_iter
+from fundrives.pan115._vendor.glob_pattern import translate_iter
 from hashtools import (
     HashObj,
     file_digest,
@@ -55,7 +55,7 @@ from hashtools import (
     file_mdigest_async,
 )
 from httpfile import AsyncHTTPFileReader, HTTPFileReader
-from id2dirnode import IdToDirnode
+from fundrives.pan115._vendor.id2dirnode import IdToDirnode
 from iterdir import iterdir_generic, walk_generic
 from iterutils import (
     map as do_map,
@@ -65,8 +65,15 @@ from iterutils import (
     Yield,
     YieldFrom,
 )
-from posixpatht import escape, joinpath, joins, normpath, path_is_dir_form, splits
-from undefined import undefined, is_undefined, Undefined
+from fundrives.pan115._vendor.posixpatht import (
+    escape,
+    joinpath,
+    joins,
+    normpath,
+    path_is_dir_form,
+    splits,
+)
+from fundrives.pan115._vendor.undefined import undefined, is_undefined, Undefined
 
 from ..client import P115Client
 from ..exception import throw

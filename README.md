@@ -49,8 +49,9 @@ uv build
 
 ## 演进路线
 
-1. **短期（当前）**：完整迁入 `p115client 0.0.9.6.5.1` 至 `fundrives.pan115` 命名空间，保持 API 100% 兼容，隔离上游高频改动。
-2. **长期**：逐步内联或替换外围微包依赖（`p115cipher` / `p115oss` / `p115pickcode` / `python-*` 等）到自有工具包中，收敛依赖面并逐步收紧 `per-file-ignores`。
+1. **阶段 0（已完成）**：完整迁入 `p115client 0.0.9.6.5.1` 至 `fundrives.pan115` 命名空间，保持 API 100% 兼容，隔离上游高频改动。
+2. **阶段 1（已完成）**：移除未使用的 `python-encode_uri`，并将 17 个零外部依赖/叶节点纯 Python 微包内联至 `fundrives.pan115._vendor/`，直接依赖从 37 个收敛至 19 个。
+3. **阶段 2 / 3（进行中）**：继续将剩余协议与工具微包（`p115cipher` / `p115oss` / `http_response` / `python-iterutils` / `python-concurrenttools` / `urllib3_future_request` 等）逐步内联或替换为标准库与自有工具包，并同步收紧 `per-file-ignores`。
 
 ## 命名空间说明
 

@@ -18,13 +18,13 @@ from os import PathLike
 from threading import Lock
 from typing import overload, Any, ClassVar, Literal, Self
 
-from dictattr import AttrDict
-from dicttools import dict_key_to_lower_update
-from errno2 import errno
+from fundrives.pan115._vendor.dictattr import AttrDict
+from fundrives.pan115._vendor.dicttools import dict_key_to_lower_update
+from fundrives.pan115._vendor.errno2 import errno
 from filewrap import Buffer, SupportsRead
 from http_request import SupportsGeturl
 from iterutils import run_gen_step
-from p115pickcode import is_valid_pickcode
+from fundrives.pan115._vendor.p115pickcode import is_valid_pickcode
 from yarl import URL
 
 from ..client import check_response, P115Client

@@ -38,7 +38,7 @@ from iterutils import (
     Yield,
     YieldFrom,
 )
-from p115pickcode import to_id
+from fundrives.pan115._vendor.p115pickcode import to_id
 
 from ..client import check_response, P115Client
 from ..exception import P115FileTooBig
@@ -310,7 +310,7 @@ def export_dir_parse_iter_path(
     """
     if isinstance(escape, bool):
         if escape:
-            from posixpatht import escape
+            from fundrives.pan115._vendor.posixpatht import escape
         else:
             from fundrives.pan115.util import posix_escape_name as escape
     escape = cast(None | Callable[[str], str], escape)

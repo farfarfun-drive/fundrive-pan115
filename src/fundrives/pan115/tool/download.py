@@ -47,11 +47,11 @@ from urllib.request import urlopen, Request
 from uuid import uuid4
 from warnings import warn
 
-from argtools import argcount
+from fundrives.pan115._vendor.argtools import argcount
 from asynctools import async_chain_from_iterable
 from concurrenttools import conmap, run_as_thread, iter_page, iter_page_multi
-from dicttools import get_first
-from errno2 import errno
+from fundrives.pan115._vendor.dicttools import get_first
+from fundrives.pan115._vendor.errno2 import errno
 from filewrap import (
     bio_chunk_iter,
     bio_chunk_async_iter,
@@ -72,7 +72,7 @@ from iterutils import (
     Yield,
     YieldFrom,
 )
-from p115pickcode import to_id
+from fundrives.pan115._vendor.p115pickcode import to_id
 
 from ..client import (
     check_response,

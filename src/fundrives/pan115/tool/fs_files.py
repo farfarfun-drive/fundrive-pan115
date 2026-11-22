@@ -11,7 +11,7 @@ from typing import overload, Any, Final, Literal
 from warnings import warn
 
 from concurrenttools import iter_offset
-from errno2 import errno
+from fundrives.pan115._vendor.errno2 import errno
 from http_response import get_status_code, is_timeouterror
 from iterutils import as_gen_step, run_gen_step
 

@@ -62,7 +62,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from filelock import FileLock
 from iterutils import run_gen_step
 from orjson import loads, dumps
-from p115pickcode import is_valid_pickcode, to_id, to_pickcode
+from fundrives.pan115._vendor.p115pickcode import is_valid_pickcode, to_id, to_pickcode
 from urllib3_future_request import request
 from yarl import URL
 
@@ -578,7 +578,7 @@ def get_stable_point(user_id: int | str) -> str:
 
 
 def set_stable_point(user_id: int | str, point_or_pickcode: str) -> str:
-    from p115pickcode import get_stable_point
+    from fundrives.pan115._vendor.p115pickcode import get_stable_point
 
     point = get_stable_point(point_or_pickcode)
     with suppress(Exception):

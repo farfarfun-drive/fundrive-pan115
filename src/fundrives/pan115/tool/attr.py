@@ -43,13 +43,13 @@ from os import PathLike
 from types import EllipsisType
 from typing import cast, overload, Any, Final, Literal
 
-from dictattr import AttrDict
-from dicttools import get_first
-from errno2 import errno
-from integer_tool import try_parse_int
+from fundrives.pan115._vendor.dictattr import AttrDict
+from fundrives.pan115._vendor.dicttools import get_first
+from fundrives.pan115._vendor.errno2 import errno
+from fundrives.pan115._vendor.integer_tool import try_parse_int
 from iterutils import as_gen_step, run_gen_step, with_iter_next
-from p115pickcode import to_id, get_stable_point
-from posixpatht import path_is_dir_form, splitext, splits
+from fundrives.pan115._vendor.p115pickcode import to_id, get_stable_point
+from fundrives.pan115._vendor.posixpatht import path_is_dir_form, splitext, splits
 
 from ..client import check_response, P115Client, P115OpenClient
 from ..const import CLASS_TO_TYPE, SUFFIX_TO_TYPE, ID_TO_DIRNODE_CACHE
@@ -1238,7 +1238,7 @@ def get_path(
     """
     if isinstance(escape, bool):
         if escape:
-            from posixpatht import escape
+            from fundrives.pan115._vendor.posixpatht import escape
         else:
             escape = posix_escape_name
     escape = cast(None | Callable[[str], str], escape)

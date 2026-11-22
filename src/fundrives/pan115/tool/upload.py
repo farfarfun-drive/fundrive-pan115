@@ -41,9 +41,9 @@ except ImportError:
         async_conmap as taskgroup_map,
         thread_conmap as threadpool_map,
     )
-from dicttools import get_first
-from dicttools import dict_map
-from errno2 import errno
+from fundrives.pan115._vendor.dicttools import get_first
+from fundrives.pan115._vendor.dicttools import dict_map
+from fundrives.pan115._vendor.errno2 import errno
 from filewrap import SupportsRead
 from hashtools import file_mdigest, file_mdigest_async
 from http_request import SupportsGeturl
@@ -65,7 +65,7 @@ from p115oss import (
     oss_multipart_part_iter,
     oss_multipart_upload_part_iter,
 )
-from p115pickcode import to_id
+from fundrives.pan115._vendor.p115pickcode import to_id
 from yarl import URL
 
 from ..client import check_response, P115Client, P115OpenClient

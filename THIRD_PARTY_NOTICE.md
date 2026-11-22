@@ -8,7 +8,18 @@
 - PyPI 包名：[`p115client`](https://pypi.org/project/p115client/)
 - 迁入基准版本：`0.0.9.6.5.1`
 - 原始协议：MIT（与本仓库的 MIT 兼容）
-- 涉及的文件：`src/fundrives/pan115/` 下的全部模块
+- 涉及的文件：`src/fundrives/pan115/` 下的核心模块
+
+## 内置纯 Python 工具微包（`src/fundrives/pan115/_vendor/`）
+
+为避免上游微包高频不兼容变更，下列同作者（ChenyangGao）的 MIT 协议纯 Python 工具模块已内联至 `src/fundrives/pan115/_vendor/` 并随本仓库自主维护：
+
+- `p115pickcode` (`0.0.5.4`)、`errno2` (`0.0.5`)、`posixpatht` (`0.0.4`)、`glob_pattern` (`0.0.2`)
+- `python-undefined` (`0.0.4`)、`python-startfile` (`0.0.3`)、`python-property` (`0.0.3`)、`id2dirnode` (`0.0.2`)
+- `python-dictattr` (`0.0.4`)、`python-temporary` (`0.0.1`)、`python-argtools` (`0.0.4`)、`integer_tool` (`0.0.6.1`)
+- `python-ensure` (`0.0.2`)、`cachedict` (`0.0.7`)、`python-dicttools` (`0.0.5`)、`python-cookietools` (`0.1.5`)、`iter_collect` (`0.0.6`)
+
+以上模块均采用与下述相同的 MIT 许可证。
 
 ### 原始许可证全文
 

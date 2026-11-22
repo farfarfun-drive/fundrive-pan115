@@ -21,9 +21,9 @@ from http.cookiejar import CookieJar, Cookie
 from http.cookies import Morsel
 from typing import Any, NamedTuple, Self
 
-from cookietools import cookies_to_dict
-from dicttools import iter_items
-from undefined import undefined
+from fundrives.pan115._vendor.cookietools import cookies_to_dict
+from fundrives.pan115._vendor.dicttools import iter_items
+from fundrives.pan115._vendor.undefined import undefined
 
 from .const import SSOENT_TO_APP
 from .exception import P115BadDownloadUrl

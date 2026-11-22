@@ -76,8 +76,8 @@ from warnings import warn
 
 from asynctools import async_collect
 from concurrenttools import run_as_thread, conmap
-from dicttools import get_first
-from errno2 import errno
+from fundrives.pan115._vendor.dicttools import get_first
+from fundrives.pan115._vendor.errno2 import errno
 from http_response import is_timeouterror
 from iterdir import iterdir_generic, walk_generic
 from iterutils import (
@@ -97,9 +97,9 @@ from iterutils import (
     Yield,
     YieldFrom,
 )
-from iter_collect import iter_keyed_dups, SupportsLT
-from p115pickcode import pickcode_to_id, to_id
-from posixpatht import splitext
+from fundrives.pan115._vendor.iter_collect import iter_keyed_dups, SupportsLT
+from fundrives.pan115._vendor.p115pickcode import pickcode_to_id, to_id
+from fundrives.pan115._vendor.posixpatht import splitext
 
 from ..client import (
     check_response,
@@ -190,7 +190,7 @@ def make_path_binder(
 ) -> Callable:
     if isinstance(escape, bool):
         if escape:
-            from posixpatht import escape
+            from fundrives.pan115._vendor.posixpatht import escape
         else:
             escape = posix_escape_name
     escape = cast(None | Callable[[str], str], escape)
@@ -400,7 +400,7 @@ def _make_top_adder(
             else:
                 if isinstance(escape, bool):
                     if escape:
-                        from posixpatht import escape
+                        from fundrives.pan115._vendor.posixpatht import escape
                     else:
                         escape = posix_escape_name
                 top_path = "/".join(escape(a["name"]) for a in top_ancestors)
@@ -840,7 +840,7 @@ def iter_file_list(
         id_to_dirnode = ID_TO_DIRNODE_CACHE[client.user_id]
     if isinstance(escape, bool):
         if escape:
-            from posixpatht import escape
+            from fundrives.pan115._vendor.posixpatht import escape
         else:
             escape = posix_escape_name
     escape = cast(None | Callable[[str], str], escape)
@@ -1682,7 +1682,7 @@ def iter_dirs_with_path(
         id_to_dirnode = {}
     if isinstance(escape, bool):
         if escape:
-            from posixpatht import escape
+            from fundrives.pan115._vendor.posixpatht import escape
         else:
             escape = posix_escape_name
     escape = cast(None | Callable[[str], str], escape)
@@ -2030,7 +2030,7 @@ def iter_files_with_path(
         client = P115Client(client)
     if isinstance(escape, bool):
         if escape:
-            from posixpatht import escape
+            from fundrives.pan115._vendor.posixpatht import escape
         else:
             escape = posix_escape_name
     escape = cast(None | Callable[[str], str], escape)
