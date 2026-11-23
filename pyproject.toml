@@ -1,6 +1,6 @@
 [project]
 name = "fundrive-pan115"
-version = "2.0.101"
+version = "2.0.102"
 description = "115网盘（p115client）云存储 API 封装"
 readme = "README.md"
 requires-python = ">=3.12"
