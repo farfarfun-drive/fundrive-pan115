@@ -39,14 +39,28 @@ def _lz4_frame(payload: bytes) -> bytes:
 
 
 def test_client_api_maps_populated_without_global_leaks():
-    """验证移除 temp_globals 后 API 映射表正常填充且不污染 client 模块命名空间。"""
+    """验证 client/ 分域子包结构、API 映射表正常填充且无全局泄漏。"""
     import fundrives.pan115.client as client_mod
 
-    assert len(CLIENT_METHOD_API_MAP) > 100
-    assert len(CLIENT_API_METHODS_MAP) > 50
+    assert hasattr(client_mod, "__path__"), "client 应已拆分为分域子包"
+    assert len(CLIENT_METHOD_API_MAP) >= 480
+    assert len(CLIENT_API_METHODS_MAP) >= 470
     assert "P115Client.fs_files" in CLIENT_METHOD_API_MAP
     assert not hasattr(client_mod, "CRE_CLIENT_API_search")
     assert not hasattr(client_mod, "temp_globals")
+    for sub in (
+        "_common",
+        "open_client",
+        "fs_mixin",
+        "transfer_mixin",
+        "share_mixin",
+        "account_mixin",
+        "extra_mixin",
+    ):
+        assert (
+            hasattr(client_mod, sub)
+            or f"fundrives.pan115.client.{sub}" in __import__("sys").modules
+        )
 
 
 def test_cookie_file_persistence_and_user_id(tmp_path):
